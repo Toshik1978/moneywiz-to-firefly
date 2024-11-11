@@ -110,12 +110,12 @@ class TransferAnalyzer:
         return Transfer(
             source=self.__accounts.get(orig.source),
             target=self.__accounts.get(orig.target),
-            description="Transfer between accounts",
+            description=f'{orig.source} -> {orig.target}',
             date=to_datetime(orig.date, orig.time),
-            source_amount=pair.amount,
-            source_currency=self.__currencies.get(pair.currency),
-            target_amount=orig.amount,
-            target_currency=self.__currencies.get(orig.currency),
+            source_amount=orig.amount,
+            source_currency=self.__currencies.get(orig.currency),
+            target_amount=pair.amount,
+            target_currency=self.__currencies.get(pair.currency),
         )
 
     def get(self) -> List[Transfer]:
