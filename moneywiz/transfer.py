@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import List, Mapping, Self
+from typing import List, Mapping, Self, Callable
 
 from moneywiz.exception import AnalyzerException
 from moneywiz.helpers import to_datetime, hash_key
@@ -36,14 +36,59 @@ class TransferAnalyzer:
     def __link(self, transfers: List[MwTransfer]) -> List[MwTransfer]:
         """Try to link straightforward transfers and return unlinked list."""
 
-        mapping = {hash_key(t.source, t.target, t.date, t.time): t for t in transfers}
+        def hash_func(t: MwTransfer, pair: bool) -> str:
+            if pair:
+                return hash_key(t.target, t.source, t.date, t.time)
+            else:
+                return hash_key(t.source, t.target, t.date, t.time)
+
+        return self.__link_generic(transfers, hash_func)
+
+    def __link_complex(self, transfers: List[MwTransfer]) -> List[MwTransfer]:
+        """Try to link complex transfers and return still unlinked list."""
+
+        transfers = self.__link_by_date(transfers)
+        if transfers:
+            transfers = self.__link_by_month(transfers)
+        return transfers
+
+    def __link_by_date(self, transfers: List[MwTransfer]) -> List[MwTransfer]:
+        """Try to link complex transfers within the same date and return still unlinked list."""
+
+        def hash_func(t: MwTransfer, pair: bool) -> str:
+            if pair:
+                return hash_key(t.target, t.source, t.date)
+            else:
+                return hash_key(t.source, t.target, t.date)
+
+        return self.__link_generic(transfers, hash_func)
+
+    def __link_by_month(self, transfers: List[MwTransfer]) -> List[MwTransfer]:
+        """Try to link complex transfers within the same month and return still unlinked list."""
+
+        def hash_func(t: MwTransfer, pair: bool) -> str:
+            date = '00' + t.date[2:]
+            if pair:
+                return hash_key(t.target, t.source, date)
+            else:
+                return hash_key(t.source, t.target, date)
+
+        return self.__link_generic(transfers, hash_func)
+
+    def __link_generic(self, transfers: List[MwTransfer], hash_func: Callable) -> List[MwTransfer]:
+        """Try to link transfers using hash function and return unlinked list."""
+
+        mapping = {hash_func(t, False): t for t in transfers}
         unlinked = []
         excluded = set()
 
         for transfer in transfers:
-            key1 = hash_key(transfer.source, transfer.target, transfer.date, transfer.time)
-            key2 = hash_key(transfer.target, transfer.source, transfer.date, transfer.time)
-            if key1 not in excluded and key2 not in excluded:
+            key1 = hash_func(transfer, False)
+            key2 = hash_func(transfer, True)
+            if key1 not in excluded:
+                if key2 in excluded:
+                    raise AnalyzerException(f'Wrong transfers symmetry: {key1} / {key2}')
+
                 excluded.add(key1)
                 excluded.add(key2)
 
@@ -56,11 +101,6 @@ class TransferAnalyzer:
                 self.__transfers.append(self.__xfer(transfer, pair))
 
         return unlinked
-
-    def __link_complex(self, transfers: List[MwTransfer]) -> List[MwTransfer]:
-        """Try to link complex transfers and return still unlinked list."""
-
-        return transfers
 
     def __xfer(self, orig: MwTransfer, pair: MwTransfer) -> Transfer:
         if orig.amount[0] != '-':
