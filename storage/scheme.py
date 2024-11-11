@@ -59,6 +59,9 @@ class Transfer(Base):
     """Money transfer record in DB."""
 
     __tablename__ = 'transfers'
+    __table_args__ = (
+        UniqueConstraint('source_id', 'target_id', 'date', name='transfers_index', sqlite_on_conflict='IGNORE'),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     """Transfer ID."""
@@ -118,6 +121,12 @@ class Payment(Base):
     account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'))
     """Account ID."""
 
+    payee: Mapped[Optional[str]] = mapped_column(String(1024))
+    """Payee."""
+
+    category: Mapped[Optional[str]] = mapped_column(String(1024))
+    """Category."""
+
     description: Mapped[Optional[str]] = mapped_column(String(1024))
     """Description."""
 
@@ -126,6 +135,9 @@ class Payment(Base):
 
     amount: Mapped[str] = mapped_column(String(64))
     """Amount of payment."""
+
+    tags: Mapped[Optional[str]] = mapped_column(String(1024))
+    """Tags."""
 
     firefly_id: Mapped[Optional[int]]
     """Firefly currency ID."""

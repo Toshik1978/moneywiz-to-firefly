@@ -12,37 +12,25 @@ from moneywiz.analyzer import CsvAnalyzer
 
 @click.command()
 @click.option('--dbpath', default='.db', type=click.Path(exists=False), help='DB directory')
-@click.option('-export', default=False, is_flag=True, help='Export only', required=False)
+@click.option('-import-only', default=False, is_flag=True, help='Import only', required=False)
 @click.option('-v', default=False, is_flag=True, help='Verbose logging', required=False)
 @click.argument('filename', type=click.Path(exists=True), required=True)
-def cli(dbpath, export, v, filename):
+def cli(dbpath, import_only, v, filename):
     logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG if v else logging.WARN)
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG if v else logging.INFO)
     logger = logging.getLogger(__name__)
 
     db = TransactionsDB(logger, dbpath)
+    importer = CsvImporter(logger)
+    analyzer = CsvAnalyzer(logger)
+
     try:
-        db.init()
+        data = importer.parse(filename)
+        analyzer.analyze(data)
+        analyzer.commit(db.init())
     except Exception as e:
-        logger.error(f'Failed to initialize database: {e}')
+        logger.error(f'Failed to import CSV file: {e}')
         sys.exit(1)
-
-    if not export:
-        importer = CsvImporter(logger)
-        analyzer = CsvAnalyzer(logger)
-        try:
-            if not analyzer.run(importer.parse(filename)):
-                logger.error(f'Failed to analyze file: {filename}')
-                sys.exit(2)
-        except Exception as e:
-            logger.error(f'Failed to parse/analyze CSV file: {e}')
-            sys.exit(3)
-
-        try:
-            analyzer.commit(db)
-        except Exception as e:
-            logger.error(f'Failed to commit transactions: {e}')
-            sys.exit(4)
 
 
 # main block

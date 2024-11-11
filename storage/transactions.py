@@ -1,6 +1,6 @@
 from logging import Logger
 from pathlib import Path
-from typing import List
+from typing import List, Self
 
 from sqlalchemy import Engine, event, create_engine, select
 from sqlalchemy.orm import Session
@@ -21,22 +21,23 @@ class TransactionsDB:
     """Transactions database."""
 
     __logger: Logger
+    __path: str
     __engine: Engine
 
     def __init__(self, logger: Logger, path: str) -> None:
         self.__logger = logger
-        self.__conn = None
+        self.__path = path
 
-        p = Path(path)
-        p.mkdir(parents=True, exist_ok=True)
-        self.__engine = create_engine(f'sqlite:///{p.joinpath(DB_NAME)}')
-
-    def init(self) -> None:
+    def init(self) -> Self:
         """Initialize database scheme."""
 
         self.__logger.info(f'Initializing database')
+        p = Path(self.__path)
+        p.mkdir(parents=True, exist_ok=True)
+        self.__engine = create_engine(f'sqlite:///{p.joinpath(DB_NAME)}')
         Base.metadata.create_all(self.__engine)
         self.__logger.info(f'Initialization finished')
+        return self
 
     def get_currencies(self) -> List[Currency]:
         """Get all currencies from DB."""
