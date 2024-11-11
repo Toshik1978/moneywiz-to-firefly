@@ -65,6 +65,7 @@ class CsvImporter:
             currency=row['Currency'],
             date=row['Date'],
             time=row['Time'],
+            category=row['Category'],
             description=row['Description'],
             amount=row['Amount'],
         )

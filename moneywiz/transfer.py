@@ -31,16 +31,20 @@ class TransferAnalyzer:
         if unlinked:
             raise AnalyzerException(
                 f'Orphaned transfers detected: {[hash_key(t.source, t.target, t.date, t.time) for t in unlinked]}')
+        if len(transfers) != len(self.__transfers) * 2:
+            raise AnalyzerException(
+                f'Missing transfers detected: {len(transfers)} vs {len(self.__transfers)*2}')
         return self
 
     def __link(self, transfers: List[MwTransfer]) -> List[MwTransfer]:
         """Try to link straightforward transfers and return unlinked list."""
 
         def hash_func(t: MwTransfer, pair: bool) -> str:
+            # t.category can help with loan payments, otherwise it's empty
             if pair:
-                return hash_key(t.target, t.source, t.date, t.time)
+                return hash_key(t.target, t.source, t.date, t.time, t.category)
             else:
-                return hash_key(t.source, t.target, t.date, t.time)
+                return hash_key(t.source, t.target, t.date, t.time, t.category)
 
         return self.__link_generic(transfers, hash_func)
 
@@ -78,7 +82,14 @@ class TransferAnalyzer:
     def __link_generic(self, transfers: List[MwTransfer], hash_func: Callable) -> List[MwTransfer]:
         """Try to link transfers using hash function and return unlinked list."""
 
-        mapping = {hash_func(t, False): t for t in transfers}
+        mapping = {}
+        for t in transfers:
+            key = hash_func(t, False)
+            if key in mapping:
+                self.__logger.error(f'Mapping collision: {key}')
+                continue
+            mapping[key] = t
+
         unlinked = []
         excluded = set()
 

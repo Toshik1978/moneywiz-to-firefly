@@ -33,6 +33,9 @@ class MwTransfer:
     target: str
     """Target account."""
 
+    category: str
+    """Category."""
+
     description: str
     """Description."""
 

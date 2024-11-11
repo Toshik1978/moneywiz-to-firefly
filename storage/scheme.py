@@ -59,9 +59,6 @@ class Transfer(Base):
     """Money transfer record in DB."""
 
     __tablename__ = 'transfers'
-    __table_args__ = (
-        UniqueConstraint('source_id', 'target_id', 'date', name='transfers_index', sqlite_on_conflict='IGNORE'),
-    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     """Transfer ID."""
