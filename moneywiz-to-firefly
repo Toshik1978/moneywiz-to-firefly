@@ -5,6 +5,7 @@ import sys
 
 import click
 
+from firefly.exporter import Exporter
 from storage.transactions import TransactionsDB
 from moneywiz.importer import CsvImporter
 from moneywiz.analyzer import CsvAnalyzer
@@ -12,24 +13,39 @@ from moneywiz.analyzer import CsvAnalyzer
 
 @click.command()
 @click.option('--dbpath', default='.db', type=click.Path(exists=False), help='DB directory')
-@click.option('-import-only', default=False, is_flag=True, help='Import only', required=False)
+@click.option('--export/--import', default=False, help='Export or import mode', required=False)
 @click.option('-v', default=False, is_flag=True, help='Verbose logging', required=False)
-@click.argument('filename', type=click.Path(exists=True), required=True)
-def cli(dbpath, import_only, v, filename):
+@click.argument('filename', type=click.Path(exists=True), required=False)
+def cli(dbpath, export, v, filename):
     logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG if v else logging.WARN)
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG if v else logging.INFO)
     logger = logging.getLogger(__name__)
 
-    importer = CsvImporter(logger)
-    analyzer = CsvAnalyzer(logger, TransactionsDB(logger, dbpath).init())
+    db = TransactionsDB(logger, dbpath).init()
 
-    try:
-        data = importer.parse(filename)
-        analyzer.analyze(data)
-        analyzer.commit()
-    except Exception as e:
-        logger.error(f'Failed to import CSV file: {e}')
-        sys.exit(1)
+    if not export:
+        if filename is None:
+            raise click.UsageError("The filename is required in the import mode.")
+
+        importer = CsvImporter(logger)
+        analyzer = CsvAnalyzer(logger, db)
+
+        try:
+            data = importer.parse(filename)
+            analyzer.analyze(data)
+            analyzer.commit()
+        except Exception as e:
+            logger.error(f'Failed to import CSV file: {e}')
+            sys.exit(1)
+
+    else:
+        exporter = Exporter(logger, db)
+
+        try:
+            exporter.export()
+        except Exception as e:
+            logger.error(f'Failed to export to Firefly III: {e}')
+            sys.exit(2)
 
 
 # main block

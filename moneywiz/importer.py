@@ -34,6 +34,7 @@ class CsvImporter:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 self.__parse(row)
+        self.__logger.info('Parsing finished')
 
         return MwData(
             currencies=list(self.__currencies.values()),
