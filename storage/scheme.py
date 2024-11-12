@@ -112,7 +112,7 @@ class Account(Base):
     firefly_id: Mapped[Optional[int]]
     """Firefly currency ID."""
 
-    currency: Mapped['Currency'] = relationship()
+    currency: Mapped['Currency'] = relationship(lazy='selectin')
 
     def __repr__(self) -> str:
         return f'Account(id={self.id!r}, name={self.name!r}, firefly_id={self.firefly_id!r})'
@@ -153,13 +153,13 @@ class Transfer(Base):
     firefly_id: Mapped[Optional[int]]
     """Firefly currency ID."""
 
-    source: Mapped['Account'] = relationship('Account', foreign_keys=[source_id])
+    source: Mapped['Account'] = relationship('Account', foreign_keys=[source_id], lazy='selectin')
 
-    target: Mapped['Account'] = relationship('Account', foreign_keys=[target_id])
+    target: Mapped['Account'] = relationship('Account', foreign_keys=[target_id], lazy='selectin')
 
-    source_currency: Mapped['Currency'] = relationship('Currency', foreign_keys=[source_currency_id])
+    source_currency: Mapped['Currency'] = relationship('Currency', foreign_keys=[source_currency_id], lazy='selectin')
 
-    target_currency: Mapped['Currency'] = relationship('Currency', foreign_keys=[target_currency_id])
+    target_currency: Mapped['Currency'] = relationship('Currency', foreign_keys=[target_currency_id], lazy='selectin')
 
     def __repr__(self) -> str:
         return f'Transfer(id={self.id!r}, name={self.get_name()!r}, firefly_id={self.firefly_id!r})'
@@ -202,13 +202,13 @@ class Payment(Base):
     firefly_id: Mapped[Optional[int]]
     """Firefly currency ID."""
 
-    account: Mapped['Account'] = relationship('Account')
+    account: Mapped['Account'] = relationship('Account', lazy='selectin')
 
-    payee: Mapped['Payee'] = relationship('Payee')
+    payee: Mapped['Payee'] = relationship('Payee', lazy='selectin')
 
-    category: Mapped['Category'] = relationship('Category')
+    category: Mapped['Category'] = relationship('Category', lazy='selectin')
 
-    tag: Mapped['Tag'] = relationship('Tag')
+    tag: Mapped['Tag'] = relationship('Tag', lazy='selectin')
 
     def __repr__(self) -> str:
         return f'Payment(id={self.id!r}, description={self.description!r}, firefly_id={self.firefly_id!r})'

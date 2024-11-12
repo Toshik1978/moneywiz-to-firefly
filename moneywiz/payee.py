@@ -11,14 +11,15 @@ class PayeeAnalyzer:
     __logger: Logger
     __payees: List[Payee]
 
-    def __init__(self, logger: Logger) -> None:
+    def __init__(self, logger: Logger, payees: List[Payee]) -> None:
         self.__logger = logger
-        self.__payees = []
+        self.__payees = payees
 
     def analyze(self, payees: List[MwPayee]) -> Self:
         """Analyze payee data."""
 
-        self.__payees = [Payee(name=p.name) for p in payees if p.name]
+        hashset = {p.name for p in self.__payees}
+        self.__payees.extend([Payee(name=p.name) for p in payees if p.name and p.name not in hashset])
         return self
 
     def get(self) -> List[Payee]:

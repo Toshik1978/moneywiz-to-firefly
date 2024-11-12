@@ -13,15 +13,18 @@ class AccountAnalyzer:
     __currencies: Mapping[str, Currency]
     __accounts: List[Account]
 
-    def __init__(self, logger: Logger, currencies: List[Currency]) -> None:
+    def __init__(self, logger: Logger, currencies: List[Currency], accounts: List[Account]) -> None:
         self.__logger = logger
         self.__currencies = {currency.name: currency for currency in currencies}
-        self.__accounts = []
+        self.__accounts = accounts
 
     def analyze(self, accounts: List[MwAccount]) -> Self:
         """Analyze account data."""
 
-        self.__accounts = [Account(name=a.name, currency=self.__currencies.get(a.currency)) for a in accounts]
+        hashset = {a.name for a in self.__accounts}
+        self.__accounts.extend(
+            [Account(name=a.name, currency=self.__currencies.get(a.currency)) for a in accounts if
+             a.name not in hashset])
         self.__validate()
         return self
 

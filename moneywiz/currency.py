@@ -11,14 +11,15 @@ class CurrencyAnalyzer:
     __logger: Logger
     __currencies: List[Currency]
 
-    def __init__(self, logger: Logger) -> None:
+    def __init__(self, logger: Logger, currencies: List[Currency]) -> None:
         self.__logger = logger
-        self.__currencies = []
+        self.__currencies = currencies
 
     def analyze(self, currencies: List[MwCurrency]) -> Self:
         """Analyze currency data."""
 
-        self.__currencies = [Currency(name=c.name) for c in currencies]
+        hashset = {c.name for c in self.__currencies}
+        self.__currencies.extend([Currency(name=c.name) for c in currencies if c.name not in hashset])
         return self
 
     def get(self) -> List[Currency]:

@@ -11,14 +11,15 @@ class TagAnalyzer:
     __logger: Logger
     __tags: List[Tag]
 
-    def __init__(self, logger: Logger) -> None:
+    def __init__(self, logger: Logger, tags: List[Tag]) -> None:
         self.__logger = logger
-        self.__tags = []
+        self.__tags = tags
 
     def analyze(self, tags: List[MwTag]) -> Self:
         """Analyze tag data."""
 
-        self.__tags = [Tag(name=t.name) for t in tags if t.name]
+        hashset = {t.name for t in self.__tags}
+        self.__tags.extend([Tag(name=t.name) for t in tags if t.name and t.name not in hashset])
         return self
 
     def get(self) -> List[Tag]:
