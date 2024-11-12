@@ -11,6 +11,36 @@ class MwCurrency:
         self.__dict__.update(kwds)
 
 
+class MwPayee:
+    """MW payee record."""
+
+    name: str
+    """Payee name."""
+
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds)
+
+
+class MwCategory:
+    """MW category record."""
+
+    name: str
+    """Category name."""
+
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds)
+
+
+class MwTag:
+    """MW tag record."""
+
+    name: str
+    """Tag name."""
+
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds)
+
+
 class MwAccount:
     """MW account record."""
 
@@ -79,8 +109,8 @@ class MwPayment:
     amount: str
     """Amount of payment."""
 
-    tags: str
-    """Tags of payment."""
+    tag: str
+    """Tag of payment."""
 
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
@@ -89,6 +119,15 @@ class MwPayment:
 class MwData:
     currencies: List[MwCurrency]
     """All currencies."""
+
+    payees: List[MwPayee]
+    """All payees."""
+
+    categories: List[MwCategory]
+    """All categories."""
+
+    tags: List[MwTag]
+    """All tags."""
 
     accounts: List[MwAccount]
     """All accounts."""

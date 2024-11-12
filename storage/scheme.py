@@ -29,6 +29,69 @@ class Currency(Base):
         return f'Currency(id={self.id!r}, name={self.name!r}, firefly_id={self.firefly_id!r})'
 
 
+class Payee(Base):
+    """Payee record in DB."""
+
+    __tablename__ = 'payees'
+    __table_args__ = (
+        UniqueConstraint('name', sqlite_on_conflict='IGNORE'),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    """Payee ID."""
+
+    name: Mapped[str] = mapped_column(String(1024))
+    """Payee name."""
+
+    firefly_id: Mapped[Optional[int]]
+    """Firefly payee ID."""
+
+    def __repr__(self) -> str:
+        return f'Payee(id={self.id!r}, name={self.name!r}, firefly_id={self.firefly_id!r})'
+
+
+class Category(Base):
+    """Category record in DB."""
+
+    __tablename__ = 'categories'
+    __table_args__ = (
+        UniqueConstraint('name', sqlite_on_conflict='IGNORE'),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    """Category ID."""
+
+    name: Mapped[str] = mapped_column(String(1024))
+    """Category name."""
+
+    firefly_id: Mapped[Optional[int]]
+    """Firefly category ID."""
+
+    def __repr__(self) -> str:
+        return f'Category(id={self.id!r}, name={self.name!r}, firefly_id={self.firefly_id!r})'
+
+
+class Tag(Base):
+    """Tag record in DB."""
+
+    __tablename__ = 'tags'
+    __table_args__ = (
+        UniqueConstraint('name', sqlite_on_conflict='IGNORE'),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    """Tag ID."""
+
+    name: Mapped[str] = mapped_column(String(1024))
+    """Tag name."""
+
+    firefly_id: Mapped[Optional[int]]
+    """Firefly tag ID."""
+
+    def __repr__(self) -> str:
+        return f'Tag(id={self.id!r}, name={self.name!r}, firefly_id={self.firefly_id!r})'
+
+
 class Account(Base):
     """Account record in DB."""
 
@@ -118,10 +181,10 @@ class Payment(Base):
     account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'))
     """Account ID."""
 
-    payee: Mapped[Optional[str]] = mapped_column(String(1024))
+    payee_id: Mapped[Optional[int]] = mapped_column(ForeignKey('payees.id'))
     """Payee."""
 
-    category: Mapped[Optional[str]] = mapped_column(String(1024))
+    category_id: Mapped[Optional[int]] = mapped_column(ForeignKey('categories.id'))
     """Category."""
 
     description: Mapped[Optional[str]] = mapped_column(String(1024))
@@ -133,13 +196,19 @@ class Payment(Base):
     amount: Mapped[str] = mapped_column(String(64))
     """Amount of payment."""
 
-    tags: Mapped[Optional[str]] = mapped_column(String(1024))
-    """Tags."""
+    tag_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tags.id'))
+    """Tag."""
 
     firefly_id: Mapped[Optional[int]]
     """Firefly currency ID."""
 
     account: Mapped['Account'] = relationship('Account')
+
+    payee: Mapped['Payee'] = relationship('Payee')
+
+    category: Mapped['Category'] = relationship('Category')
+
+    tag: Mapped['Tag'] = relationship('Tag')
 
     def __repr__(self) -> str:
         return f'Payment(id={self.id!r}, description={self.description!r}, firefly_id={self.firefly_id!r})'

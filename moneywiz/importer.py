@@ -1,7 +1,7 @@
 import csv
 from logging import Logger
 
-from moneywiz.scheme import MwAccount, MwCurrency, MwTransfer, MwPayment, MwData
+from moneywiz.scheme import MwAccount, MwCurrency, MwTransfer, MwPayment, MwData, MwPayee, MwCategory, MwTag
 
 
 class CsvImporter:
@@ -9,6 +9,9 @@ class CsvImporter:
 
     __logger: Logger
     __currencies: dict[str, MwCurrency]
+    __payees: dict[str, MwPayee]
+    __categories: dict[str, MwCategory]
+    __tags: dict[str, MwTag]
     __accounts: dict[str, MwAccount]
     __transfers: list[MwTransfer]
     __payments: list[MwPayment]
@@ -16,6 +19,9 @@ class CsvImporter:
     def __init__(self, logger: Logger):
         self.__logger = logger
         self.__currencies = {}
+        self.__payees = {}
+        self.__categories = {}
+        self.__tags = {}
         self.__accounts = {}
         self.__transfers = []
         self.__payments = []
@@ -31,6 +37,9 @@ class CsvImporter:
 
         return MwData(
             currencies=list(self.__currencies.values()),
+            payees=list(self.__payees.values()),
+            categories=list(self.__categories.values()),
+            tags=list(self.__tags.values()),
             accounts=list(self.__accounts.values()),
             transfers=self.__transfers,
             payments=self.__payments,
@@ -74,6 +83,9 @@ class CsvImporter:
     def __parse_tx(self, row: dict) -> None:
         self.__logger.debug(f'Parsing transaction: {row["Description"]}')
 
+        self.__parse_payee(row['Payee'])
+        self.__parse_category(row['Category'])
+        self.__parse_tag(row['Tags'].rstrip('; '))
         payment = MwPayment(
             account=row['Account'],
             payee=row['Payee'],
@@ -82,7 +94,7 @@ class CsvImporter:
             date=row['Date'],
             time=row['Time'],
             amount=row['Amount'],
-            tags=row['Tags'],
+            tag=row['Tags'].rstrip('; '),
         )
         self.__payments.append(payment)
 
@@ -103,3 +115,24 @@ class CsvImporter:
         else:
             self.__logger.debug(f'Account already exists: {name}')
         return account
+
+    def __parse_payee(self, name: str) -> None:
+        payee = self.__payees.get(name)
+        if payee is None:
+            self.__payees[name] = MwPayee(name=name)
+        else:
+            self.__logger.debug(f'Payee already exists: {name}')
+
+    def __parse_category(self, name: str) -> None:
+        category = self.__categories.get(name)
+        if category is None:
+            self.__categories[name] = MwCategory(name=name)
+        else:
+            self.__logger.debug(f'Category already exists: {name}')
+
+    def __parse_tag(self, name: str) -> None:
+        tag = self.__tags.get(name)
+        if tag is None:
+            self.__tags[name] = MwTag(name=name)
+        else:
+            self.__logger.debug(f'Tag already exists: {name}')

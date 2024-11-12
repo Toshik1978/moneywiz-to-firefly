@@ -5,7 +5,7 @@ from typing import List, Self
 from sqlalchemy import Engine, event, create_engine, select
 from sqlalchemy.orm import Session
 
-from storage.scheme import Base, Currency, Account, Transfer, Payment
+from storage.scheme import Base, Currency, Payee, Category, Tag, Account, Transfer, Payment
 
 DB_NAME = 'MoneyWiz.sqlite'
 
@@ -45,6 +45,24 @@ class TransactionsDB:
         with Session(self.__engine) as session:
             return [c for c in session.scalars(select(Currency)).all()]
 
+    def get_payees(self) -> List[Payee]:
+        """Get all payees from DB."""
+
+        with Session(self.__engine) as session:
+            return [c for c in session.scalars(select(Payee)).all()]
+
+    def get_categories(self) -> List[Category]:
+        """Get all categories from DB."""
+
+        with Session(self.__engine) as session:
+            return [c for c in session.scalars(select(Category)).all()]
+
+    def get_tags(self) -> List[Tag]:
+        """Get all tags from DB."""
+
+        with Session(self.__engine) as session:
+            return [c for c in session.scalars(select(Tag)).all()]
+
     def get_accounts(self) -> List[Account]:
         """Get all accounts from DB."""
 
@@ -69,6 +87,30 @@ class TransactionsDB:
         with Session(self.__engine) as session:
             for currency in currencies:
                 session.add(currency)
+            session.commit()
+
+    def add_payees(self, payees: List[Payee]) -> None:
+        """Add new payees to DB."""
+
+        with Session(self.__engine) as session:
+            for payee in payees:
+                session.add(payee)
+            session.commit()
+
+    def add_categories(self, categories: List[Category]) -> None:
+        """Add new categories to DB."""
+
+        with Session(self.__engine) as session:
+            for category in categories:
+                session.add(category)
+            session.commit()
+
+    def add_tags(self, tags: List[Tag]) -> None:
+        """Add new tags to DB."""
+
+        with Session(self.__engine) as session:
+            for tag in tags:
+                session.add(tag)
             session.commit()
 
     def add_accounts(self, accounts: List[Account]) -> None:

@@ -33,7 +33,8 @@ class TransferAnalyzer:
                 f'Orphaned transfers detected: {[hash_key(t.source, t.target, t.date, t.time) for t in unlinked]}')
         if len(transfers) != len(self.__transfers) * 2:
             raise AnalyzerException(
-                f'Missing transfers detected: {len(transfers)} vs {len(self.__transfers)*2}')
+                f'Missing transfers detected: {len(transfers)} vs {len(self.__transfers) * 2}')
+        self.__validate()
         return self
 
     def __link(self, transfers: List[MwTransfer]) -> List[MwTransfer]:
@@ -133,3 +134,10 @@ class TransferAnalyzer:
         """Get transfer data."""
 
         return self.__transfers
+
+    def __validate(self) -> None:
+        # We can check if numbers are equal for the same currencies on both sides.
+        transfers = [t for t in self.__transfers if
+                     t.source_currency == t.target_currency and t.source_amount != '-' + t.target_amount]
+        if transfers:
+            raise AnalyzerException(f'Orphaned transfers detected: {transfers}')
