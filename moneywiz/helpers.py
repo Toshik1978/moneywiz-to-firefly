@@ -6,6 +6,7 @@ def to_datetime(date: str, time: str) -> datetime:
 
     return datetime.strptime(f"{date} {time}", "%d/%m/%Y %H:%M")
 
+
 def hash_key(*args: str) -> str:
     """Generate hash key using any number of input strings."""
 

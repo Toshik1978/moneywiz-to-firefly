@@ -1,6 +1,7 @@
 import csv
 from logging import Logger
 
+from moneywiz.helpers import hash_key
 from moneywiz.scheme import MwAccount, MwCurrency, MwTransfer, MwPayment, MwData, MwPayee, MwCategory, MwTag
 
 
@@ -84,7 +85,7 @@ class CsvImporter:
     def __parse_tx(self, row: dict) -> None:
         self.__logger.debug(f'Parsing transaction: {row["Description"]}')
 
-        self.__parse_payee(row['Payee'])
+        self.__parse_payee(row['Payee'], row['Amount'][0] == '-')
         self.__parse_category(row['Category'])
         self.__parse_tag(row['Tags'].rstrip('; '))
         payment = MwPayment(
@@ -117,10 +118,10 @@ class CsvImporter:
             self.__logger.debug(f'Account already exists: {name}')
         return account
 
-    def __parse_payee(self, name: str) -> None:
-        payee = self.__payees.get(name)
+    def __parse_payee(self, name: str, expense: bool) -> None:
+        payee = self.__payees.get(hash_key(name, str(expense)))
         if payee is None:
-            self.__payees[name] = MwPayee(name=name)
+            self.__payees[hash_key(name, str(expense))] = MwPayee(name=name, expense=expense)
         else:
             self.__logger.debug(f'Payee already exists: {name}')
 

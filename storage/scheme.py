@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import String, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import String, DateTime, Boolean, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -34,7 +34,7 @@ class Payee(Base):
 
     __tablename__ = 'payees'
     __table_args__ = (
-        UniqueConstraint('name', sqlite_on_conflict='IGNORE'),
+        UniqueConstraint('name', 'expense', sqlite_on_conflict='IGNORE'),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -42,6 +42,9 @@ class Payee(Base):
 
     name: Mapped[str] = mapped_column(String(1024))
     """Payee name."""
+
+    expense: Mapped[bool] = mapped_column(Boolean)
+    """Expense category or not."""
 
     firefly_id: Mapped[Optional[int]]
     """Firefly payee ID."""
@@ -110,7 +113,7 @@ class Account(Base):
     """Currency ID."""
 
     firefly_id: Mapped[Optional[int]]
-    """Firefly currency ID."""
+    """Firefly account ID."""
 
     currency: Mapped['Currency'] = relationship(lazy='selectin')
 
@@ -151,7 +154,7 @@ class Transfer(Base):
     """Currency ID."""
 
     firefly_id: Mapped[Optional[int]]
-    """Firefly currency ID."""
+    """Firefly transfer ID."""
 
     source: Mapped['Account'] = relationship('Account', foreign_keys=[source_id], lazy='selectin')
 
@@ -200,7 +203,7 @@ class Payment(Base):
     """Tag."""
 
     firefly_id: Mapped[Optional[int]]
-    """Firefly currency ID."""
+    """Firefly payment ID."""
 
     account: Mapped['Account'] = relationship('Account', lazy='selectin')
 

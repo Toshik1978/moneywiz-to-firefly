@@ -10,6 +10,9 @@ class MwCurrency:
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
 
+    def __repr__(self) -> str:
+        return f'MwCurrency(name={self.name!r})'
+
 
 class MwPayee:
     """MW payee record."""
@@ -17,8 +20,14 @@ class MwPayee:
     name: str
     """Payee name."""
 
+    expense: bool
+    """Expense payee or not."""
+
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
+
+    def __repr__(self) -> str:
+        return f'MwPayee(name={self.name!r}, expense={self.expense!r})'
 
 
 class MwCategory:
@@ -30,6 +39,9 @@ class MwCategory:
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
 
+    def __repr__(self) -> str:
+        return f'MwCategory(name={self.name!r})'
+
 
 class MwTag:
     """MW tag record."""
@@ -39,6 +51,9 @@ class MwTag:
 
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
+
+    def __repr__(self) -> str:
+        return f'MwTag(name={self.name!r})'
 
 
 class MwAccount:
@@ -52,6 +67,9 @@ class MwAccount:
 
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
+
+    def __repr__(self) -> str:
+        return f'MwAccount(name={self.name!r}, currency={self.currency!r})'
 
 
 class MwTransfer:
@@ -84,6 +102,9 @@ class MwTransfer:
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
 
+    def __repr__(self) -> str:
+        return f'MwTransfer(source={self.source!r}, target={self.target!r}, date={self.date!r}, amount={self.amount!r})'
+
 
 class MwPayment:
     """MW payment record."""
@@ -114,6 +135,9 @@ class MwPayment:
 
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
+
+    def __repr__(self) -> str:
+        return f'MwPayment(account={self.account!r}, payee={self.payee!r}, date={self.date!r}, amount={self.amount!r})'
 
 
 class MwData:

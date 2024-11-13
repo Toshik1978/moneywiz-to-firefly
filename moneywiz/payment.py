@@ -2,7 +2,7 @@ from logging import Logger
 from typing import List, Mapping, Self
 
 from moneywiz.exception import AnalyzerException
-from moneywiz.helpers import to_datetime
+from moneywiz.helpers import to_datetime, hash_key
 from moneywiz.scheme import MwPayment
 from storage.scheme import Payee, Category, Tag, Account, Payment
 
@@ -19,7 +19,7 @@ class PaymentAnalyzer:
 
     def __init__(self, logger: Logger, payees: List[Payee], categories: List[Category], tags: List[Tag], accounts: List[Account]) -> None:
         self.__logger = logger
-        self.__payees = {payee.name: payee for payee in payees}
+        self.__payees = {hash_key(payee.name, str(payee.expense)): payee for payee in payees}
         self.__categories = {category.name: category for category in categories}
         self.__tags = {tag.name: tag for tag in tags}
         self.__accounts = {account.name: account for account in accounts}
@@ -31,7 +31,7 @@ class PaymentAnalyzer:
         self.__payments = [
             Payment(
                 account=self.__accounts.get(p.account),
-                payee=self.__payees.get(p.payee),
+                payee=self.__payees.get(hash_key(p.payee, str(p.amount[0] == '-'))),
                 category=self.__categories.get(p.category),
                 description=p.description,
                 tag=self.__tags.get(p.tag),

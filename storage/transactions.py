@@ -84,7 +84,7 @@ class TransactionsDB:
     def add_currencies(self, currencies: List[Currency]) -> None:
         """Add new currencies to DB."""
 
-        with Session(self.__engine) as session:
+        with Session(self.__engine, expire_on_commit=False) as session:
             for currency in currencies:
                 session.add(currency)
             session.commit()
@@ -92,7 +92,7 @@ class TransactionsDB:
     def add_payees(self, payees: List[Payee]) -> None:
         """Add new payees to DB."""
 
-        with Session(self.__engine) as session:
+        with Session(self.__engine, expire_on_commit=False) as session:
             for payee in payees:
                 session.add(payee)
             session.commit()
@@ -100,7 +100,7 @@ class TransactionsDB:
     def add_categories(self, categories: List[Category]) -> None:
         """Add new categories to DB."""
 
-        with Session(self.__engine) as session:
+        with Session(self.__engine, expire_on_commit=False) as session:
             for category in categories:
                 session.add(category)
             session.commit()
@@ -108,7 +108,7 @@ class TransactionsDB:
     def add_tags(self, tags: List[Tag]) -> None:
         """Add new tags to DB."""
 
-        with Session(self.__engine) as session:
+        with Session(self.__engine, expire_on_commit=False) as session:
             for tag in tags:
                 session.add(tag)
             session.commit()
@@ -116,7 +116,7 @@ class TransactionsDB:
     def add_accounts(self, accounts: List[Account]) -> None:
         """Add new accounts to DB."""
 
-        with Session(self.__engine) as session:
+        with Session(self.__engine, expire_on_commit=False) as session:
             for account in accounts:
                 session.add(account)
             session.commit()
@@ -124,7 +124,7 @@ class TransactionsDB:
     def add_transfers(self, transfers: List[Transfer]) -> None:
         """Add new transfers to DB."""
 
-        with Session(self.__engine) as session:
+        with Session(self.__engine, expire_on_commit=False) as session:
             for transfer in transfers:
                 session.add(transfer)
             session.commit()
@@ -132,7 +132,7 @@ class TransactionsDB:
     def add_payments(self, payments: List[Payment]) -> None:
         """Add new payments to DB."""
 
-        with Session(self.__engine) as session:
+        with Session(self.__engine, expire_on_commit=False) as session:
             for payment in payments:
                 session.add(payment)
             session.commit()
