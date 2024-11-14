@@ -22,6 +22,8 @@ from moneywiz.analyzer import CsvAnalyzer
 @click.argument('filename', type=click.Path(exists=True), required=False)
 def cli(dbpath, url, token, export, v, filename):
     logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG if v else logging.WARN)
+    logging.getLogger("firefly_iii_client").setLevel(logging.DEBUG if v else logging.WARN)
+    logging.getLogger("urllib3").setLevel(logging.DEBUG if v else logging.WARN)
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG if v else logging.INFO)
     logger = logging.getLogger(__name__)
 
