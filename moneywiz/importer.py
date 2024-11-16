@@ -30,12 +30,12 @@ class CsvImporter:
     def parse(self, filename: str) -> MwData:
         """Parse CSV file."""
 
-        self.__logger.info(f'Parsing {filename}')
+        self.__logger.info(f'Parsing {filename}...')
         with open(filename, encoding='utf-8-sig') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 self.__parse(row)
-        self.__logger.info('Parsing finished')
+        self.__logger.info(f'Parsing {filename}... Done')
 
         return MwData(
             currencies=list(self.__currencies.values()),
@@ -54,7 +54,7 @@ class CsvImporter:
             elif row['Transfers']:
                 self.__parse_transfer(row)
             else:
-                self.__parse_tx(row)
+                self.__parse_payment(row)
         except KeyError:
             self.__logger.error(f'Parsing failed: {row}')
             pass
@@ -65,6 +65,7 @@ class CsvImporter:
         currency = self.__get_currency(row['Account'])
         account = self.__get_account(row['Name'])
         account.currency = currency.name
+        account.balance = row['Current balance']
         self.__accounts[account.name] = account
 
     def __parse_transfer(self, row: dict) -> None:
@@ -79,10 +80,11 @@ class CsvImporter:
             category=row['Category'],
             description=row['Description'],
             amount=row['Amount'],
+            balance=row['Balance'],
         )
         self.__transfers.append(transfer)
 
-    def __parse_tx(self, row: dict) -> None:
+    def __parse_payment(self, row: dict) -> None:
         self.__logger.debug(f'Parsing transaction: {row["Description"]}')
 
         self.__parse_payee(row['Payee'], row['Amount'][0] == '-')
@@ -96,6 +98,7 @@ class CsvImporter:
             date=row['Date'],
             time=row['Time'],
             amount=row['Amount'],
+            balance=row['Balance'],
             tag=row['Tags'].rstrip('; '),
         )
         self.__payments.append(payment)
@@ -112,7 +115,7 @@ class CsvImporter:
     def __get_account(self, name: str) -> MwAccount:
         account = self.__accounts.get(name)
         if account is None:
-            account = MwAccount(name=name)
+            account = MwAccount(name=name, currency=None, balance=None)
             self.__accounts[name] = account
         else:
             self.__logger.debug(f'Account already exists: {name}')

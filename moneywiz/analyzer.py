@@ -33,7 +33,7 @@ class CsvAnalyzer:
     def analyze(self, mw: MwData) -> None:
         """Run data analysis."""
 
-        self.__logger.info("Analysing MoneyWiz CSV...")
+        self.__logger.info('Analyzing MoneyWiz CSV...')
 
         self.__currencies = CurrencyAnalyzer(self.__logger, self.__db.get_currencies()).analyze(mw.currencies).get()
         self.__payees = PayeeAnalyzer(self.__logger, self.__db.get_payees()).analyze(mw.payees).get()
@@ -47,7 +47,7 @@ class CsvAnalyzer:
         self.__payments = PaymentAnalyzer(self.__logger, self.__payees, self.__categories, self.__tags,
                                           self.__accounts).analyze(mw.payments).get()
 
-        self.__logger.info("Analysis finished")
+        self.__logger.info('Analyzing MoneyWiz CSV... Done')
 
     def commit(self) -> None:
         """Commit changes."""

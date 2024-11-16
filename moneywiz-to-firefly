@@ -7,6 +7,7 @@ import click
 from dotenv import load_dotenv
 
 from firefly.client import FireflyClient
+from firefly.config import load_config
 from firefly.exporter import Exporter
 from storage.transactions import TransactionsDB
 from moneywiz.importer import CsvImporter
@@ -18,9 +19,10 @@ from moneywiz.analyzer import CsvAnalyzer
 @click.option('--url', help='Firefly III URL')
 @click.option('--token', help='Firefly III token')
 @click.option('--export/--import', is_flag=True, default=False, help='Export or import mode')
+@click.option('--config', type=click.Path(exists=True), help='Configuration file for export')
 @click.option('-v', is_flag=True, default=False, help='Verbose logging')
 @click.argument('filename', type=click.Path(exists=True), required=False)
-def cli(dbpath, url, token, export, v, filename):
+def cli(dbpath, url, token, export, config, v, filename):
     logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG if v else logging.WARN)
     logging.getLogger("firefly_iii_client").setLevel(logging.DEBUG if v else logging.WARN)
     logging.getLogger("urllib3").setLevel(logging.DEBUG if v else logging.WARN)
@@ -50,7 +52,7 @@ def cli(dbpath, url, token, export, v, filename):
         if token is None:
             raise click.UsageError("The Firefly token is required in the export mode.")
 
-        exporter = Exporter(logger, db, FireflyClient(logger, url, token))
+        exporter = Exporter(logger, db, FireflyClient(logger, url, token), load_config(logger, config))
 
         try:
             exporter.export()

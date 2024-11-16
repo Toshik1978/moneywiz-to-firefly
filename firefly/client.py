@@ -2,9 +2,8 @@ import uuid
 from logging import Logger
 from typing import List
 
-from firefly_iii_client import ApiClient, configuration, CurrenciesApi, CurrencyStore
-
-from firefly.scheme import FfCurrency
+from firefly_iii_client import ApiClient, configuration, CurrenciesApi, CurrencyStore, AccountsApi, AccountStore, \
+    CurrencyRead, AccountRead
 
 
 class FireflyClient:
@@ -24,7 +23,7 @@ class FireflyClient:
             header_value='application/json'
         )
 
-    def get_currencies(self) -> List[FfCurrency]:
+    def get_currencies(self) -> List[CurrencyRead]:
         """Get currencies on the server."""
 
         api = CurrenciesApi(self.__client)
@@ -33,38 +32,42 @@ class FireflyClient:
 
         while True:
             r = api.list_currency(x_trace_id=str(uuid.uuid4()), limit=100, page=page)
-
-            for currency in r.data:
-                currencies.append(
-                    FfCurrency(
-                        id=int(currency.id),
-                        name=currency.attributes.name,
-                        code=currency.attributes.code,
-                        symbol=currency.attributes.symbol,
-                        enabled=currency.attributes.enabled,
-                    )
-                )
-
+            currencies.extend(r.data)
             if r.meta.pagination.current_page == r.meta.pagination.total_pages:
                 break
             page += 1
 
         return currencies
 
-    def create_currency(self, currency: FfCurrency) -> int:
+    def create_currency(self, currency: CurrencyStore) -> int:
         """Create a new currency."""
 
-        r = CurrenciesApi(self.__client).store_currency(
-            CurrencyStore(
-                code=currency.code,
-                name=currency.name,
-                symbol=currency.symbol,
-            ),
-            x_trace_id=str(uuid.uuid4())
-        )
+        r = CurrenciesApi(self.__client).store_currency(currency, x_trace_id=str(uuid.uuid4()))
         return int(r.data.id)
 
     def enable_currency(self, code: str) -> None:
         """Enable given currency."""
 
         CurrenciesApi(self.__client).enable_currency(code)
+
+    def get_accounts(self) -> List[AccountRead]:
+        """Get accounts on the server."""
+
+        api = AccountsApi(self.__client)
+        page = 1
+        accounts = []
+
+        while True:
+            r = api.list_account(x_trace_id=str(uuid.uuid4()), limit=100, page=page)
+            accounts.extend(r.data)
+            if r.meta.pagination.current_page == r.meta.pagination.total_pages:
+                break
+            page += 1
+
+        return accounts
+
+    def create_account(self, account: AccountStore) -> int:
+        """Create a new account."""
+
+        r = AccountsApi(self.__client).store_account(account, x_trace_id=str(uuid.uuid4()))
+        return int(r.data.id)

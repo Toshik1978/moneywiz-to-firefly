@@ -126,7 +126,7 @@ class TransactionsDB:
 
         with Session(self.__engine, expire_on_commit=False) as session:
             for transfer in transfers:
-                session.add(transfer)
+                session.merge(transfer)
             session.commit()
 
     def add_payments(self, payments: List[Payment]) -> None:

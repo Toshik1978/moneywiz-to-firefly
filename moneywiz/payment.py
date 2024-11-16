@@ -28,6 +28,7 @@ class PaymentAnalyzer:
     def analyze(self, payments: List[MwPayment]) -> Self:
         """Analyze payment data."""
 
+        self.__logger.info('Analyzing payments...')
         self.__payments = [
             Payment(
                 account=self.__accounts.get(p.account),
@@ -36,11 +37,13 @@ class PaymentAnalyzer:
                 description=p.description,
                 tag=self.__tags.get(p.tag),
                 amount=p.amount,
+                balance=p.balance,
                 date=to_datetime(p.date, p.time),
             )
             for p in payments
         ]
         self.__validate()
+        self.__logger.info('Analyzing payments... Done')
         return self
 
     def get(self) -> List[Payment]:

@@ -1,19 +1,16 @@
-from typing import List
+from dataclasses import dataclass
+from typing import List, Optional
 
 
+@dataclass
 class MwCurrency:
     """MW currency record."""
 
     name: str
     """Currency name."""
 
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
 
-    def __repr__(self) -> str:
-        return f'MwCurrency(name={self.name!r})'
-
-
+@dataclass
 class MwPayee:
     """MW payee record."""
 
@@ -23,55 +20,38 @@ class MwPayee:
     expense: bool
     """Expense payee or not."""
 
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
 
-    def __repr__(self) -> str:
-        return f'MwPayee(name={self.name!r}, expense={self.expense!r})'
-
-
+@dataclass
 class MwCategory:
     """MW category record."""
 
     name: str
     """Category name."""
 
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
 
-    def __repr__(self) -> str:
-        return f'MwCategory(name={self.name!r})'
-
-
+@dataclass
 class MwTag:
     """MW tag record."""
 
     name: str
     """Tag name."""
 
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
 
-    def __repr__(self) -> str:
-        return f'MwTag(name={self.name!r})'
-
-
+@dataclass
 class MwAccount:
     """MW account record."""
 
     name: str
     """Account name."""
 
-    currency: str
+    currency: Optional[str]
     """Currency."""
 
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
-
-    def __repr__(self) -> str:
-        return f'MwAccount(name={self.name!r}, currency={self.currency!r})'
+    balance: Optional[str]
+    """Balance."""
 
 
+@dataclass
 class MwTransfer:
     """MW money transfer record."""
 
@@ -99,13 +79,11 @@ class MwTransfer:
     currency: str
     """Currency."""
 
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
-
-    def __repr__(self) -> str:
-        return f'MwTransfer(source={self.source!r}, target={self.target!r}, date={self.date!r}, amount={self.amount!r})'
+    balance: str
+    """Balance."""
 
 
+@dataclass
 class MwPayment:
     """MW payment record."""
 
@@ -130,16 +108,14 @@ class MwPayment:
     amount: str
     """Amount of payment."""
 
+    balance: str
+    """Balance."""
+
     tag: str
     """Tag of payment."""
 
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
 
-    def __repr__(self) -> str:
-        return f'MwPayment(account={self.account!r}, payee={self.payee!r}, date={self.date!r}, amount={self.amount!r})'
-
-
+@dataclass
 class MwData:
     currencies: List[MwCurrency]
     """All currencies."""
@@ -161,6 +137,3 @@ class MwData:
 
     payments: List[MwPayment]
     """All payments."""
-
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)

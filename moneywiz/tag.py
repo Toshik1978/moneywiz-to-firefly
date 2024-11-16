@@ -18,8 +18,10 @@ class TagAnalyzer:
     def analyze(self, tags: List[MwTag]) -> Self:
         """Analyze tag data."""
 
+        self.__logger.info('Analyzing tags...')
         hashset = {t.name for t in self.__tags}
         self.__tags.extend([Tag(name=t.name) for t in tags if t.name and t.name not in hashset])
+        self.__logger.info('Analyzing tags... Done')
         return self
 
     def get(self) -> List[Tag]:

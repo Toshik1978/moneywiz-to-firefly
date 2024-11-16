@@ -19,9 +19,11 @@ class PayeeAnalyzer:
     def analyze(self, payees: List[MwPayee]) -> Self:
         """Analyze payee data."""
 
+        self.__logger.info('Analyzing payees...')
         hashset = {hash_key(p.name, str(p.expense)) for p in self.__payees}
         self.__payees.extend([Payee(name=p.name, expense=p.expense) for p in payees if
                               p.name and hash_key(p.name, str(p.expense)) not in hashset])
+        self.__logger.info('Analyzing payees... Done')
         return self
 
     def get(self) -> List[Payee]:

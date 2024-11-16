@@ -24,6 +24,8 @@ class TransferAnalyzer:
     def analyze(self, transfers: List[MwTransfer]) -> Self:
         """Analyze transfer data."""
 
+        self.__logger.info('Analyzing transfers...')
+
         # Try to link trivial transfers first
         unlinked = self.__link(transfers)
         # And process unlinked
@@ -35,6 +37,8 @@ class TransferAnalyzer:
             raise AnalyzerException(
                 f'Missing transfers detected: {len(transfers)} vs {len(self.__transfers) * 2}')
         self.__validate()
+
+        self.__logger.info('Analyzing transfers... Done')
         return self
 
     def __link(self, transfers: List[MwTransfer]) -> List[MwTransfer]:
@@ -126,8 +130,10 @@ class TransferAnalyzer:
             date=to_datetime(orig.date, orig.time),
             source_amount=orig.amount,
             source_currency=self.__currencies.get(orig.currency),
+            source_balance=orig.balance,
             target_amount=pair.amount,
             target_currency=self.__currencies.get(pair.currency),
+            target_balance=pair.balance,
         )
 
     def get(self) -> List[Transfer]:

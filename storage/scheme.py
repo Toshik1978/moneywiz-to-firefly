@@ -112,6 +112,9 @@ class Account(Base):
     currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'))
     """Currency ID."""
 
+    balance: Mapped[str] = mapped_column(String(64))
+    """Current balance."""
+
     firefly_id: Mapped[Optional[int]]
     """Firefly account ID."""
 
@@ -147,11 +150,17 @@ class Transfer(Base):
     source_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'))
     """Currency ID."""
 
+    source_balance: Mapped[str] = mapped_column(String(64))
+    """Balance after transfer."""
+
     target_amount: Mapped[str] = mapped_column(String(64))
     """Amount of transfer for the target account."""
 
     target_currency_id: Mapped[int] = mapped_column(ForeignKey('currencies.id'))
     """Currency ID."""
+
+    target_balance: Mapped[str] = mapped_column(String(64))
+    """Balance after transfer."""
 
     firefly_id: Mapped[Optional[int]]
     """Firefly transfer ID."""
@@ -198,6 +207,9 @@ class Payment(Base):
 
     amount: Mapped[str] = mapped_column(String(64))
     """Amount of payment."""
+
+    balance: Mapped[str] = mapped_column(String(64))
+    """Balance after payment."""
 
     tag_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tags.id'))
     """Tag."""

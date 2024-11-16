@@ -21,11 +21,20 @@ class AccountAnalyzer:
     def analyze(self, accounts: List[MwAccount]) -> Self:
         """Analyze account data."""
 
-        hashset = {a.name for a in self.__accounts}
+        self.__logger.info('Analyzing accounts...')
+        mapping = {a.name: a for a in self.__accounts}
+
+        # Update balances for existing accounts
+        for a in accounts:
+            if a.name in mapping:
+                mapping[a.name].balance = a.balance
+        # Add new accounts
         self.__accounts.extend(
-            [Account(name=a.name, currency=self.__currencies.get(a.currency)) for a in accounts if
-             a.name not in hashset])
+            [Account(name=a.name, currency=self.__currencies.get(a.currency), balance=a.balance) for a in accounts if
+             a.name not in mapping])
+
         self.__validate()
+        self.__logger.info('Analyzing accounts... Done')
         return self
 
     def get(self) -> List[Account]:
