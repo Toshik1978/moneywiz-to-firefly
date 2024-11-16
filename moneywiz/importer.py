@@ -129,6 +129,7 @@ class CsvImporter:
             self.__logger.debug(f'Payee already exists: {name}')
 
     def __parse_category(self, name: str) -> None:
+        name = name.replace(b'\xe2\x96\xb6\xef\xb8\x8e'.decode('utf-8'), '-')
         category = self.__categories.get(name)
         if category is None:
             self.__categories[name] = MwCategory(name=name)

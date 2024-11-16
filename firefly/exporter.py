@@ -2,9 +2,12 @@ from logging import Logger
 from typing import List
 
 from firefly.account import AccountExporter
+from firefly.category import CategoryExporter
 from firefly.client import FireflyClient
 from firefly.config import Config
 from firefly.currency import CurrencyExporter
+from firefly.payee import PayeeExporter
+from firefly.tag import TagExporter
 from storage.scheme import Currency, Account, Transfer, Payment, Payee, Category, Tag
 from storage.transactions import TransactionsDB
 
@@ -35,5 +38,8 @@ class Exporter:
 
         self.__logger.info('Export financial data to Firefly III...')
         CurrencyExporter(self.__logger, self.__db, self.__client).sync()
+        CategoryExporter(self.__logger, self.__db, self.__client).sync()
+        TagExporter(self.__logger, self.__db, self.__client).sync()
+        PayeeExporter(self.__logger, self.__db, self.__client).sync()
         AccountExporter(self.__logger, self.__db, self.__client, self.__config).sync()
         self.__logger.info('Export financial data to Firefly III... Done')
