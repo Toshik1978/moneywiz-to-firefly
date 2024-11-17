@@ -33,24 +33,24 @@ class PayeeExporter:
 
     def __sync_db(self, db: List[Payee], ff: List[AccountRead]) -> None:
         # Update firefly_id for all payees exist in Firefly
-        mapping = {'-'.join([str(c.attributes.name), str(c.attributes.type)]): c for c in ff}
-        for c in db:
-            ff_c = mapping.get('-'.join(
-                [c.name, str(ShortAccountTypeProperty.EXPENSE if c.expense else ShortAccountTypeProperty.REVENUE)]))
-            if ff_c and c.firefly_id is None:
-                c.firefly_id = int(ff_c.id)
-                self.__logger.debug(f'Payee {c.name} updated in database. Id={c.firefly_id}')
+        mapping = {'-'.join([str(p.attributes.name), str(p.attributes.type)]): p for p in ff}
+        for p in db:
+            ff_p = mapping.get('-'.join(
+                [p.name, str(ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE)]))
+            if ff_p and p.firefly_id is None:
+                p.firefly_id = int(ff_p.id)
+                self.__logger.debug(f'Payee {p.name} updated in database. Id={p.firefly_id}')
         self.__db.add_payees(db)
 
     def __sync_ff(self, db: List[Payee], ff: List[AccountRead]) -> None:
         # Create payee in Firefly
-        mapping = {'-'.join([str(c.attributes.name), str(c.attributes.type)]): c for c in ff}
-        for c in db:
-            ff_c = mapping.get('-'.join(
-                [c.name, str(ShortAccountTypeProperty.EXPENSE if c.expense else ShortAccountTypeProperty.REVENUE)]))
-            if ff_c is None:
+        mapping = {'-'.join([str(p.attributes.name), str(p.attributes.type)]): p for p in ff}
+        for p in db:
+            ff_p = mapping.get('-'.join(
+                [p.name, str(ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE)]))
+            if ff_p is None:
                 # Create payee and update database object
-                c.firefly_id = self.__client.create_account(AccountStore(name=c.name,
-                                                                         type=ShortAccountTypeProperty.EXPENSE if c.expense else ShortAccountTypeProperty.REVENUE))
-                self.__logger.debug(f'Payee {c.name} created. Id={c.firefly_id}')
+                p.firefly_id = self.__client.create_account(AccountStore(name=p.name,
+                                                                         type=ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE))
+                self.__logger.debug(f'Payee {p.name} created. Id={p.firefly_id}')
         self.__db.add_payees(db)

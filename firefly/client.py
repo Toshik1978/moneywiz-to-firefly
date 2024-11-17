@@ -3,7 +3,8 @@ from logging import Logger
 from typing import List
 
 from firefly_iii_client import ApiClient, configuration, CurrenciesApi, CurrencyStore, AccountsApi, AccountStore, \
-    CurrencyRead, AccountRead, CategoryRead, CategoriesApi, Category, TagRead, TagsApi, TagModelStore
+    CurrencyRead, AccountRead, CategoryRead, CategoriesApi, Category, TagRead, TagsApi, TagModelStore, TransactionRead, \
+    TransactionsApi, TransactionStore
 
 
 class FireflyClient:
@@ -31,7 +32,7 @@ class FireflyClient:
         currencies = []
 
         while True:
-            r = api.list_currency(x_trace_id=str(uuid.uuid4()), limit=100, page=page)
+            r = api.list_currency(x_trace_id=str(uuid.uuid4()), limit=1000, page=page)
             currencies.extend(r.data)
             if r.meta.pagination.current_page == r.meta.pagination.total_pages:
                 break
@@ -58,7 +59,7 @@ class FireflyClient:
         accounts = []
 
         while True:
-            r = api.list_account(x_trace_id=str(uuid.uuid4()), limit=100, page=page)
+            r = api.list_account(x_trace_id=str(uuid.uuid4()), limit=1000, page=page)
             accounts.extend(r.data)
             if r.meta.pagination.current_page == r.meta.pagination.total_pages:
                 break
@@ -80,7 +81,7 @@ class FireflyClient:
         categories = []
 
         while True:
-            r = api.list_category(x_trace_id=str(uuid.uuid4()), limit=100, page=page)
+            r = api.list_category(x_trace_id=str(uuid.uuid4()), limit=1000, page=page)
             categories.extend(r.data)
             if r.meta.pagination.current_page == r.meta.pagination.total_pages:
                 break
@@ -102,7 +103,7 @@ class FireflyClient:
         tags = []
 
         while True:
-            r = api.list_tag(x_trace_id=str(uuid.uuid4()), limit=100, page=page)
+            r = api.list_tag(x_trace_id=str(uuid.uuid4()), limit=1000, page=page)
             tags.extend(r.data)
             if r.meta.pagination.current_page == r.meta.pagination.total_pages:
                 break
@@ -114,4 +115,26 @@ class FireflyClient:
         """Create a new tag."""
 
         r = TagsApi(self.__client).store_tag(tag, x_trace_id=str(uuid.uuid4()))
+        return int(r.data.id)
+
+    def get_transactions(self) -> List[TransactionRead]:
+        """Get transactions on the server."""
+
+        api = TransactionsApi(self.__client)
+        page = 1
+        transactions = []
+
+        while True:
+            r = api.list_transaction(x_trace_id=str(uuid.uuid4()), limit=1000, page=page)
+            transactions.extend(r.data)
+            if r.meta.pagination.current_page == r.meta.pagination.total_pages:
+                break
+            page += 1
+
+        return transactions
+
+    def create_transaction(self, transaction: TransactionStore) -> int:
+        """Create a new transaction."""
+
+        r = TransactionsApi(self.__client).store_transaction(transaction, x_trace_id=str(uuid.uuid4()))
         return int(r.data.id)

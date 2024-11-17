@@ -33,21 +33,21 @@ class TagExporter:
 
     def __sync_db(self, db: List[Tag], ff: List[TagRead]) -> None:
         # Update firefly_id for all tags exist in Firefly
-        mapping = {c.attributes.tag: c for c in ff}
-        for c in db:
-            ff_c = mapping.get(c.name)
-            if ff_c and c.firefly_id is None:
-                c.firefly_id = int(ff_c.id)
-                self.__logger.debug(f'Tag {c.name} updated in database. Id={c.firefly_id}')
+        mapping = {t.attributes.tag: t for t in ff}
+        for t in db:
+            ff_t = mapping.get(t.name)
+            if ff_t and t.firefly_id is None:
+                t.firefly_id = int(ff_t.id)
+                self.__logger.debug(f'Tag {t.name} updated in database. Id={t.firefly_id}')
         self.__db.add_tags(db)
 
     def __sync_ff(self, db: List[Tag], ff: List[TagRead]) -> None:
         # Create tag in Firefly
-        mapping = {c.attributes.tag: c for c in ff}
-        for c in db:
-            ff_c = mapping.get(c.name)
-            if ff_c is None:
+        mapping = {t.attributes.tag: t for t in ff}
+        for t in db:
+            ff_t = mapping.get(t.name)
+            if ff_t is None:
                 # Create tag and update database object
-                c.firefly_id = self.__client.create_tag(TagModelStore(tag=c.name))
-                self.__logger.debug(f'Tag {c.name} created. Id={c.firefly_id}')
+                t.firefly_id = self.__client.create_tag(TagModelStore(tag=t.name))
+                self.__logger.debug(f'Tag {t.name} created. Id={t.firefly_id}')
         self.__db.add_tags(db)

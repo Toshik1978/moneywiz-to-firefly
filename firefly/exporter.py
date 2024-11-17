@@ -7,7 +7,9 @@ from firefly.client import FireflyClient
 from firefly.config import Config
 from firefly.currency import CurrencyExporter
 from firefly.payee import PayeeExporter
+from firefly.payment import PaymentExporter
 from firefly.tag import TagExporter
+from firefly.transfer import TransferExporter
 from storage.scheme import Currency, Account, Transfer, Payment, Payee, Category, Tag
 from storage.transactions import TransactionsDB
 
@@ -37,9 +39,11 @@ class Exporter:
         """Run export."""
 
         self.__logger.info('Export financial data to Firefly III...')
-        CurrencyExporter(self.__logger, self.__db, self.__client).sync()
-        CategoryExporter(self.__logger, self.__db, self.__client).sync()
-        TagExporter(self.__logger, self.__db, self.__client).sync()
-        PayeeExporter(self.__logger, self.__db, self.__client).sync()
-        AccountExporter(self.__logger, self.__db, self.__client, self.__config).sync()
+        # CurrencyExporter(self.__logger, self.__db, self.__client).sync()
+        # CategoryExporter(self.__logger, self.__db, self.__client).sync()
+        # TagExporter(self.__logger, self.__db, self.__client).sync()
+        # PayeeExporter(self.__logger, self.__db, self.__client).sync()
+        # AccountExporter(self.__logger, self.__db, self.__client, self.__config).sync()
+        PaymentExporter(self.__logger, self.__db, self.__client).sync()
+        TransferExporter(self.__logger, self.__db, self.__client).sync()
         self.__logger.info('Export financial data to Firefly III... Done')
