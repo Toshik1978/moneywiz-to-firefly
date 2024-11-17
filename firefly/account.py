@@ -50,6 +50,7 @@ class AccountExporter:
 
     def __sync_ff(self, db: List[Account], ff: List[AccountRead]) -> None:
         # Create account in Firefly
+        index = 0
         mapping = {a.attributes.name: a for a in ff}
         for a in db:
             ff_a = mapping.get(a.name)
@@ -57,6 +58,10 @@ class AccountExporter:
                 # Create account and update database object
                 a.firefly_id = self.__client.create_account(self.__to_ff(a))
                 self.__logger.debug(f'Account {a.name} created. Id={a.firefly_id}')
+
+                index += 1
+                if index % 100 == 0:
+                    self.__logger.info(f'\t...{index} accounts created...')
         self.__db.add_accounts(db)
 
     def __to_ff(self, account: Account) -> AccountStore:
