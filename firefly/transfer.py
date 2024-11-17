@@ -58,7 +58,7 @@ class TransferExporter:
                 destination_id=self.__accounts[t.target_id],
                 foreign_currency_id=self.__currencies[t.target_currency_id] if t.source_currency_id != t.target_currency_id else None,
                 foreign_amount=to_amount(t.target_amount) if t.source_currency_id != t.target_currency_id else None,
-                description=t.description,
+                description=t.description if t.description else 'No description',
                 external_id=str(t.id),
             )
         ])

@@ -62,7 +62,7 @@ class PaymentExporter:
                 destination_id=payee_id if withdrawal else account_id,
                 category_id=self.__categories[p.category_id] if p.category_id else None,
                 tags=[p.tag.name] if p.tag else None,
-                description=p.description,
+                description=p.description if p.description else 'No description',
                 external_id=str(p.id),
             )
         ])
