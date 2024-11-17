@@ -36,11 +36,16 @@ class PaymentExporter:
 
     def __sync_ff(self, db: List[Payment]) -> None:
         # Create payments in Firefly
+        index = 0
         for p in db:
             if p.firefly_id is None:
                 # Create transaction and update database object
                 p.firefly_id = self.__client.create_transaction(self.__to_ff(p))
                 self.__logger.debug(f'Payment created. Id={p.firefly_id}')
+
+                index += 1
+                if index % 100 == 0:
+                    self.__logger.info(f'\t...{index} payments created...')
         self.__db.add_payments(db)
 
     def __to_ff(self, p: Payment) -> TransactionStore:

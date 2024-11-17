@@ -34,11 +34,16 @@ class TransferExporter:
 
     def __sync_ff(self, db: List[Transfer]) -> None:
         # Create transfer in Firefly
+        index = 0
         for t in db:
             if t.firefly_id is None:
                 # Create transaction and update database object
                 t.firefly_id = self.__client.create_transaction(self.__to_ff(t))
                 self.__logger.debug(f'Transfer created. Id={t.firefly_id}')
+
+                index += 1
+                if index % 100 == 0:
+                    self.__logger.info(f'\t...{index} transfers created...')
         self.__db.add_transfers(db)
 
     def __to_ff(self, t: Transfer) -> TransactionStore:
