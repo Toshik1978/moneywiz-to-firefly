@@ -44,6 +44,7 @@ class PayeeExporter:
 
     def __sync_ff(self, db: List[Payee], ff: List[AccountRead]) -> None:
         # Create payee in Firefly
+        index = 0
         mapping = {'-'.join([str(p.attributes.name), str(p.attributes.type)]): p for p in ff}
         for p in db:
             ff_p = mapping.get('-'.join(
@@ -53,4 +54,8 @@ class PayeeExporter:
                 p.firefly_id = self.__client.create_account(AccountStore(name=p.name,
                                                                          type=ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE))
                 self.__logger.debug(f'Payee {p.name} created. Id={p.firefly_id}')
+
+                index += 1
+                if index % 100 == 0:
+                    self.__logger.info(f'\t...{index} payees created...')
         self.__db.add_payees(db)
