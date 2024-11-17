@@ -62,6 +62,7 @@ class AccountExporter:
                 index += 1
                 if index % 100 == 0:
                     self.__logger.info(f'\t...{index} accounts created...')
+        self.__logger.info(f'{index} accounts created in total')
         self.__db.add_accounts(db)
 
     def __to_ff(self, account: Account) -> AccountStore:

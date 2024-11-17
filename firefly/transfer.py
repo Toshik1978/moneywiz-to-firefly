@@ -44,6 +44,7 @@ class TransferExporter:
                 index += 1
                 if index % 100 == 0:
                     self.__logger.info(f'\t...{index} transfers created...')
+        self.__logger.info(f'{index} transfers created in total')
         self.__db.add_transfers(db)
 
     def __to_ff(self, t: Transfer) -> TransactionStore:

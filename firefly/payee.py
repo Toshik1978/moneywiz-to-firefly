@@ -58,4 +58,5 @@ class PayeeExporter:
                 index += 1
                 if index % 100 == 0:
                     self.__logger.info(f'\t...{index} payees created...')
+        self.__logger.info(f'{index} payees created in total')
         self.__db.add_payees(db)

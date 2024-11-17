@@ -46,6 +46,7 @@ class PaymentExporter:
                 index += 1
                 if index % 100 == 0:
                     self.__logger.info(f'\t...{index} payments created...')
+        self.__logger.info(f'{index} payments created in total')
         self.__db.add_payments(db)
 
     def __to_ff(self, p: Payment) -> TransactionStore:
