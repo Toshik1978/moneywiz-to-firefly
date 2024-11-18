@@ -4,8 +4,8 @@ from typing import List, Mapping
 from firefly_iii_client import TransactionStore, TransactionSplitStore, TransactionTypeProperty, \
     ShortAccountTypeProperty
 
+from helpers import to_amount
 from firefly.client import FireflyClient
-from firefly.helpers import to_amount
 from storage.scheme import Transfer, Account
 from storage.transactions import TransactionsDB
 

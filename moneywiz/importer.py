@@ -1,7 +1,7 @@
 import csv
 from logging import Logger
 
-from moneywiz.helpers import hash_key
+from helpers import hash_key, replace_arrow
 from moneywiz.scheme import MwAccount, MwCurrency, MwTransfer, MwPayment, MwData, MwPayee, MwCategory, MwTag
 
 
@@ -77,7 +77,7 @@ class CsvImporter:
             currency=row['Currency'],
             date=row['Date'],
             time=row['Time'],
-            category=row['Category'],
+            category=replace_arrow(row['Category']),
             description=row['Description'],
             amount=row['Amount'],
             balance=row['Balance'],
@@ -88,12 +88,12 @@ class CsvImporter:
         self.__logger.debug(f'Parsing transaction: {row["Description"]}')
 
         self.__parse_payee(row['Payee'], row['Amount'][0] == '-')
-        self.__parse_category(row['Category'])
+        self.__parse_category(replace_arrow(row['Category']))
         self.__parse_tag(row['Tags'].rstrip('; '))
         payment = MwPayment(
             account=row['Account'],
             payee=row['Payee'],
-            category=row['Category'],
+            category=replace_arrow(row['Category']),
             description=row['Description'],
             date=row['Date'],
             time=row['Time'],
@@ -129,7 +129,6 @@ class CsvImporter:
             self.__logger.debug(f'Payee already exists: {name}')
 
     def __parse_category(self, name: str) -> None:
-        name = name.replace(b'\xe2\x96\xb6\xef\xb8\x8e'.decode('utf-8'), '-')
         category = self.__categories.get(name)
         if category is None:
             self.__categories[name] = MwCategory(name=name)

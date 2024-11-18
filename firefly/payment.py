@@ -3,8 +3,8 @@ from typing import List, Mapping
 
 from firefly_iii_client import TransactionStore, TransactionSplitStore, TransactionTypeProperty
 
+from helpers import to_amount
 from firefly.client import FireflyClient
-from firefly.helpers import to_amount
 from storage.scheme import Payment
 from storage.transactions import TransactionsDB
 

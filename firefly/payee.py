@@ -4,6 +4,7 @@ from typing import List
 from firefly_iii_client import AccountRead, AccountStore, ShortAccountTypeProperty
 
 from firefly.client import FireflyClient
+from helpers import hash_key
 from storage.scheme import Payee
 from storage.transactions import TransactionsDB
 
@@ -33,10 +34,10 @@ class PayeeExporter:
 
     def __sync_db(self, db: List[Payee], ff: List[AccountRead]) -> None:
         # Update firefly_id for all payees exist in Firefly
-        mapping = {'-'.join([str(p.attributes.name), str(p.attributes.type)]): p for p in ff}
+        mapping = {hash_key(str(p.attributes.name), str(p.attributes.type)): p for p in ff}
         for p in db:
-            ff_p = mapping.get('-'.join(
-                [p.name, str(ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE)]))
+            ff_p = mapping.get(hash_key(
+                p.name, str(ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE)))
             if ff_p and p.firefly_id is None:
                 p.firefly_id = int(ff_p.id)
                 self.__logger.debug(f'Payee {p.name} updated in database. Id={p.firefly_id}')
@@ -45,10 +46,10 @@ class PayeeExporter:
     def __sync_ff(self, db: List[Payee], ff: List[AccountRead]) -> None:
         # Create payee in Firefly
         index = 0
-        mapping = {'-'.join([str(p.attributes.name), str(p.attributes.type)]): p for p in ff}
+        mapping = {hash_key(str(p.attributes.name), str(p.attributes.type)): p for p in ff}
         for p in db:
-            ff_p = mapping.get('-'.join(
-                [p.name, str(ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE)]))
+            ff_p = mapping.get(hash_key(
+                p.name, str(ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE)))
             if ff_p is None:
                 # Create payee and update database object
                 p.firefly_id = self.__client.create_account(AccountStore(name=p.name,

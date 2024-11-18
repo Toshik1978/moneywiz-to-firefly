@@ -2,7 +2,7 @@ from logging import Logger
 from typing import List, Mapping, Self, Callable
 
 from moneywiz.exception import AnalyzerException
-from moneywiz.helpers import to_datetime, hash_key
+from helpers import to_datetime, hash_key
 from moneywiz.scheme import MwTransfer
 from storage.scheme import Currency, Account, Transfer
 

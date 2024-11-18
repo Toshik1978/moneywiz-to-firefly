@@ -1,7 +1,7 @@
 from logging import Logger
 from typing import List, Self
 
-from moneywiz.helpers import hash_key
+from helpers import hash_key
 from moneywiz.scheme import MwPayee
 from storage.scheme import Payee
 
