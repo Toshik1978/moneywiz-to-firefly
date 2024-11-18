@@ -40,12 +40,14 @@ class PaymentExporter:
         for p in db:
             if p.firefly_id is None:
                 # Create transaction and update database object
-                p.firefly_id = self.__client.create_transaction(self.__to_ff(p))
-                self.__logger.debug(f'Payment created. Id={p.firefly_id}')
+                ff_p = self.__to_ff(p)
+                if ff_p.transactions[0].amount != '0.00':
+                    p.firefly_id = self.__client.create_transaction(ff_p)
+                    self.__logger.debug(f'Payment created. Id={p.firefly_id}')
 
-                index += 1
-                if index % 100 == 0:
-                    self.__logger.info(f'\t...{index} payments created...')
+                    index += 1
+                    if index % 100 == 0:
+                        self.__logger.info(f'\t...{index} payments created...')
         self.__logger.info(f'{index} payments created in total')
         self.__db.add_payments(db)
 
