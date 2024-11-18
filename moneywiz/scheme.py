@@ -61,6 +61,9 @@ class MwTransfer:
     target: str
     """Target account."""
 
+    payee: str
+    """Payee."""
+
     category: str
     """Category."""
 

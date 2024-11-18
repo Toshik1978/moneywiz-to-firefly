@@ -41,8 +41,11 @@ class SettingsConfig:
     default_account_role: str
     """Default account role."""
 
-    loan_category: str
-    """Name of the loan category."""
+    loan_payment_category: str
+    """Name of the loan payment category."""
+
+    loan_interest_category: str
+    """Name of the loan interest category."""
 
 
 @dataclass_json

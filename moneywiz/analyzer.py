@@ -42,8 +42,8 @@ class CsvAnalyzer:
         self.__accounts = AccountAnalyzer(self.__logger, self.__currencies, self.__db.get_accounts()).analyze(
             mw.accounts).get()
 
-        self.__transfers = TransferAnalyzer(self.__logger, self.__currencies, self.__accounts).analyze(
-            mw.transfers).get()
+        self.__transfers = TransferAnalyzer(self.__logger, self.__currencies, self.__payees, self.__categories,
+                                            self.__accounts).analyze(mw.transfers).get()
         self.__payments = PaymentAnalyzer(self.__logger, self.__payees, self.__categories, self.__tags,
                                           self.__accounts).analyze(mw.payments).get()
 

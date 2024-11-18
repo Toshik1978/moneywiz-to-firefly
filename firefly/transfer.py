@@ -4,7 +4,7 @@ from typing import List, Mapping
 from firefly_iii_client import TransactionStore, TransactionSplitStore, TransactionTypeProperty, \
     ShortAccountTypeProperty
 
-from firefly.config import Config
+from firefly.config import Config, SettingsConfig
 from helpers import to_amount
 from firefly.client import FireflyClient
 from storage.scheme import Transfer, Account
@@ -19,14 +19,17 @@ class TransferExporter:
     __client: FireflyClient
     __accounts: Mapping[int, Account]
     __currencies: Mapping[int, str]
-    __loan_category: str
-    __loan_category_id: str
+    __payees: Mapping[int, str]
+
+    __settings: SettingsConfig
+    __loan_payment_category_id: str
+    __loan_interest_category_id: str
 
     def __init__(self, logger: Logger, db: TransactionsDB, client: FireflyClient, config: Config):
         self.__logger = logger
         self.__db = db
         self.__client = client
-        self.__loan_category = config.settings.loan_category
+        self.__settings = config.settings
 
     def sync(self) -> None:
         """Synchronize the transfers in the database and Firefly III."""
@@ -34,7 +37,11 @@ class TransferExporter:
         self.__logger.info('Sync transfers...')
         self.__accounts = {a.id: a for a in self.__db.get_accounts()}
         self.__currencies = {c.id: str(c.firefly_id) for c in self.__db.get_currencies()}
-        self.__loan_category_id = next(str(c.firefly_id) for c in self.__db.get_categories() if c.name == self.__loan_category)
+        self.__payees = {p.id: str(p.firefly_id) for p in self.__db.get_payees()}
+        self.__loan_payment_category_id = next(
+            str(c.firefly_id) for c in self.__db.get_categories() if c.name == self.__settings.loan_payment_category)
+        self.__loan_interest_category_id = next(
+            str(c.firefly_id) for c in self.__db.get_categories() if c.name == self.__settings.loan_interest_category)
         self.__sync_ff(self.__db.get_transfers())
         self.__logger.info('Sync transfers... Done')
 
@@ -56,25 +63,42 @@ class TransferExporter:
         self.__db.add_transfers(db)
 
     def __to_ff(self, t: Transfer) -> TransactionStore:
-        src = self.__accounts[t.source_id]
-        dst = self.__accounts[t.target_id]
-        category_id = None
-        tx_type = TransactionTypeProperty.TRANSFER
-        if dst.firefly_type == str(ShortAccountTypeProperty.LIABILITY):
-            category_id = self.__loan_category_id
-            tx_type = TransactionTypeProperty.WITHDRAWAL
+        if self.__accounts[t.target_id].firefly_type == str(ShortAccountTypeProperty.LIABILITY):
+            return self.__to_ff_liability(t)
 
         return TransactionStore(transactions=[
             TransactionSplitStore(
-                type=tx_type,
+                type=TransactionTypeProperty.TRANSFER,
+                var_date=t.date,
+                amount=to_amount(t.source_amount),
+                currency_id=self.__currencies[t.source_currency_id],
+                source_id=str(self.__accounts[t.source_id].firefly_id),
+                destination_id=str(self.__accounts[t.target_id].firefly_id),
+                foreign_currency_id=self.__currencies[
+                    t.target_currency_id] if t.source_currency_id != t.target_currency_id else None,
+                foreign_amount=to_amount(t.target_amount) if t.source_currency_id != t.target_currency_id else None,
+                description=t.description if t.description else 'No description',
+                external_id=str(t.id),
+            )
+        ])
+
+    def __to_ff_liability(self, t: Transfer) -> TransactionStore:
+        # It's either withdrawal to liability account or expense (to the bank)
+        dst_id = str(self.__accounts[t.target_id].firefly_id)
+        category_id = self.__loan_payment_category_id
+        if t.category.name == self.__settings.loan_interest_category:
+            dst_id = self.__payees[t.payee_id]
+            category_id = self.__loan_interest_category_id
+
+        return TransactionStore(transactions=[
+            TransactionSplitStore(
+                type=TransactionTypeProperty.WITHDRAWAL,
                 var_date=t.date,
                 amount=to_amount(t.source_amount),
                 category_id=category_id,
                 currency_id=self.__currencies[t.source_currency_id],
-                source_id=str(src.firefly_id),
-                destination_id=str(dst.firefly_id),
-                foreign_currency_id=self.__currencies[t.target_currency_id] if t.source_currency_id != t.target_currency_id else None,
-                foreign_amount=to_amount(t.target_amount) if t.source_currency_id != t.target_currency_id else None,
+                source_id=str(self.__accounts[t.source_id].firefly_id),
+                destination_id=dst_id,
                 description=t.description if t.description else 'No description',
                 external_id=str(t.id),
             )

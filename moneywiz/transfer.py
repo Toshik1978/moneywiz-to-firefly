@@ -4,7 +4,7 @@ from typing import List, Mapping, Self, Callable
 from moneywiz.exception import AnalyzerException
 from helpers import to_datetime, hash_key
 from moneywiz.scheme import MwTransfer
-from storage.scheme import Currency, Account, Transfer
+from storage.scheme import Currency, Account, Transfer, Category, Payee
 
 
 class TransferAnalyzer:
@@ -12,12 +12,16 @@ class TransferAnalyzer:
 
     __logger: Logger
     __currencies: Mapping[str, Currency]
+    __payees: Mapping[str, Payee]
+    __categories: Mapping[str, Category]
     __accounts: Mapping[str, Account]
     __transfers: List[Transfer]
 
-    def __init__(self, logger: Logger, currencies: List[Currency], accounts: List[Account]) -> None:
+    def __init__(self, logger: Logger, currencies: List[Currency], payees: List[Payee], categories: List[Category], accounts: List[Account]) -> None:
         self.__logger = logger
         self.__currencies = {currency.name: currency for currency in currencies}
+        self.__payees = {hash_key(payee.name, str(payee.expense)): payee for payee in payees}
+        self.__categories = {category.name: category for category in categories}
         self.__accounts = {account.name: account for account in accounts}
         self.__transfers = []
 
@@ -126,6 +130,8 @@ class TransferAnalyzer:
         return Transfer(
             source=self.__accounts.get(orig.source),
             target=self.__accounts.get(orig.target),
+            payee=self.__payees.get(hash_key(orig.payee, str(True))),
+            category=self.__categories.get(orig.category),
             description=f'{orig.source} -> {orig.target}',
             date=to_datetime(orig.date, orig.time),
             source_amount=orig.amount,

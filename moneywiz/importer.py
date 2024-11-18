@@ -71,9 +71,12 @@ class CsvImporter:
     def __parse_transfer(self, row: dict) -> None:
         self.__logger.debug(f'Parsing transfer: {row["Transfers"]}')
 
+        self.__parse_payee(row['Payee'], True)
+        self.__parse_category(replace_arrow(row['Category']))
         transfer = MwTransfer(
             source=row['Account'],
             target=row['Transfers'],
+            payee=row['Payee'],
             currency=row['Currency'],
             date=row['Date'],
             time=row['Time'],

@@ -141,6 +141,12 @@ class Transfer(Base):
     target_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'))
     """Target account ID."""
 
+    payee_id: Mapped[Optional[int]] = mapped_column(ForeignKey('payees.id'))
+    """Payee."""
+
+    category_id: Mapped[Optional[int]] = mapped_column(ForeignKey('categories.id'))
+    """Category."""
+
     description: Mapped[Optional[str]] = mapped_column(String(1024))
     """Description."""
 
@@ -175,6 +181,10 @@ class Transfer(Base):
     source_currency: Mapped['Currency'] = relationship('Currency', foreign_keys=[source_currency_id], lazy='selectin')
 
     target_currency: Mapped['Currency'] = relationship('Currency', foreign_keys=[target_currency_id], lazy='selectin')
+
+    payee: Mapped['Payee'] = relationship('Payee', lazy='selectin')
+
+    category: Mapped['Category'] = relationship('Category', lazy='selectin')
 
     def __repr__(self) -> str:
         return f'Transfer(id={self.id!r}, name={self.get_name()!r}, firefly_id={self.firefly_id!r})'
