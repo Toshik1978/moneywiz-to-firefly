@@ -85,7 +85,7 @@ class AccountExporter:
 
         if account_type == ShortAccountTypeProperty.LIABILITY:
             ff.liability_type = LiabilityTypeProperty(mapping.liability_type)
-            ff.liability_direction = LiabilityDirectionProperty.CREDIT
+            ff.liability_direction = LiabilityDirectionProperty.DEBIT
             ff.interest = mapping.interest
 
         return ff
