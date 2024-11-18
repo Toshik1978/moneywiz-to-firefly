@@ -4,6 +4,7 @@ from typing import List, Mapping
 from firefly_iii_client import TransactionStore, TransactionSplitStore, TransactionTypeProperty, \
     ShortAccountTypeProperty
 
+from firefly.config import Config
 from helpers import to_amount
 from firefly.client import FireflyClient
 from storage.scheme import Transfer, Account
@@ -18,11 +19,14 @@ class TransferExporter:
     __client: FireflyClient
     __accounts: Mapping[int, Account]
     __currencies: Mapping[int, str]
+    __loan_category: str
+    __loan_category_id: str
 
-    def __init__(self, logger: Logger, db: TransactionsDB, client: FireflyClient):
+    def __init__(self, logger: Logger, db: TransactionsDB, client: FireflyClient, config: Config):
         self.__logger = logger
         self.__db = db
         self.__client = client
+        self.__loan_category = config.settings.loan_category
 
     def sync(self) -> None:
         """Synchronize the transfers in the database and Firefly III."""
@@ -30,6 +34,7 @@ class TransferExporter:
         self.__logger.info('Sync transfers...')
         self.__accounts = {a.id: a for a in self.__db.get_accounts()}
         self.__currencies = {c.id: str(c.firefly_id) for c in self.__db.get_currencies()}
+        self.__loan_category_id = next(str(c.firefly_id) for c in self.__db.get_categories() if c.name == self.__loan_category)
         self.__sync_ff(self.__db.get_transfers())
         self.__logger.info('Sync transfers... Done')
 
@@ -53,10 +58,10 @@ class TransferExporter:
     def __to_ff(self, t: Transfer) -> TransactionStore:
         src = self.__accounts[t.source_id]
         dst = self.__accounts[t.target_id]
+        category_id = None
         tx_type = TransactionTypeProperty.TRANSFER
-        if src.firefly_type == str(ShortAccountTypeProperty.LIABILITY):
-            tx_type = TransactionTypeProperty.DEPOSIT
-        elif dst.firefly_type == str(ShortAccountTypeProperty.LIABILITY):
+        if dst.firefly_type == str(ShortAccountTypeProperty.LIABILITY):
+            category_id = self.__loan_category_id
             tx_type = TransactionTypeProperty.WITHDRAWAL
 
         return TransactionStore(transactions=[
@@ -64,6 +69,7 @@ class TransferExporter:
                 type=tx_type,
                 var_date=t.date,
                 amount=to_amount(t.source_amount),
+                category_id=category_id,
                 currency_id=self.__currencies[t.source_currency_id],
                 source_id=str(src.firefly_id),
                 destination_id=str(dst.firefly_id),
