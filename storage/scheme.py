@@ -118,6 +118,9 @@ class Account(Base):
     firefly_id: Mapped[Optional[int]]
     """Firefly account ID."""
 
+    firefly_type: Mapped[Optional[str]] = mapped_column(String(256))
+    """Firefly account type."""
+
     currency: Mapped['Currency'] = relationship(lazy='selectin')
 
     def __repr__(self) -> str:

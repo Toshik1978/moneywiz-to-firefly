@@ -56,7 +56,9 @@ class AccountExporter:
             ff_a = mapping.get(a.name)
             if ff_a is None:
                 # Create account and update database object
-                a.firefly_id = self.__client.create_account(self.__to_ff(a))
+                ff_a = self.__to_ff(a)
+                a.firefly_id = self.__client.create_account(ff_a)
+                a.firefly_type = str(ff_a.type)
                 self.__logger.debug(f'Account {a.name} created. Id={a.firefly_id}')
 
                 index += 1
