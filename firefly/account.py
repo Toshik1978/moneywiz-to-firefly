@@ -3,7 +3,7 @@ from logging import Logger
 from typing import List, Mapping
 
 from firefly_iii_client import AccountRead, AccountStore, ShortAccountTypeProperty, AccountRoleProperty, \
-    LiabilityTypeProperty, CreditCardTypeProperty, LiabilityDirectionProperty, AccountUpdate
+    LiabilityTypeProperty, CreditCardTypeProperty, LiabilityDirectionProperty, AccountUpdate, InterestPeriodProperty
 
 from firefly.client import FireflyClient
 from firefly.config import Config, SettingsConfig, AccountConfig
@@ -69,7 +69,7 @@ class AccountExporter:
             else:
                 # If we have account, let's check if we want to disable it.
                 # We don't want to delete anything, so we will disable ignored accounts, too.
-                config = self.__accounts.get(ff_a.name)
+                config = self.__accounts.get(ff_a.attributes.name)
                 if config is not None:
                     if ff_a.attributes.active and (not config.active or config.ignore):
                         self.__client.update_account(ff_a.id, AccountUpdate(name=ff_a.attributes.name, active=False,
@@ -105,6 +105,7 @@ class AccountExporter:
             ff.liability_type = LiabilityTypeProperty(config.liability_type)
             ff.liability_direction = LiabilityDirectionProperty.DEBIT
             ff.interest = config.interest
+            ff.interest_period = InterestPeriodProperty.MONTHLY
 
         return ff
 
