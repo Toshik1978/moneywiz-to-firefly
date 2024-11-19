@@ -49,16 +49,16 @@ class TransferExporter:
         # Create transfer in Firefly
         index = 0
         for t in db:
-            if t.firefly_id is None:
-                # Create transaction and update database object
-                ff_t = self.__to_ff(t)
-                if ff_t.transactions[0].amount != '0.00':
-                    t.firefly_id = self.__client.create_transaction(ff_t)
-                    self.__logger.debug(f'Transfer created. Id={t.firefly_id}')
+            # Create transaction and update database object
+            # It's possible to have split transfers, but we don't care and create them separately!
+            ff_t = self.__to_ff(t)
+            if ff_t.transactions[0].amount != '0.00':
+                t.firefly_id = self.__client.create_transaction(ff_t)
+                self.__logger.debug(f'Transfer created. Id={t.firefly_id}')
 
-                    index += 1
-                    if index % 100 == 0:
-                        self.__logger.info(f'\t...{index} transfers created...')
+                index += 1
+                if index % 100 == 0:
+                    self.__logger.info(f'\t...{index} transfers created...')
         self.__logger.info(f'{index} transfers created in total')
         self.__db.add_transfers(db)
 

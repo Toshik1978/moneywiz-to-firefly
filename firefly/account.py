@@ -3,10 +3,11 @@ from logging import Logger
 from typing import List, Mapping
 
 from firefly_iii_client import AccountRead, AccountStore, ShortAccountTypeProperty, AccountRoleProperty, \
-    LiabilityTypeProperty, CreditCardTypeProperty, LiabilityDirectionProperty
+    LiabilityTypeProperty, CreditCardTypeProperty, LiabilityDirectionProperty, AccountUpdate
 
 from firefly.client import FireflyClient
 from firefly.config import Config, SettingsConfig, AccountConfig
+from helpers import to_datetime
 from storage.scheme import Account
 from storage.transactions import TransactionsDB
 
@@ -57,36 +58,53 @@ class AccountExporter:
             if ff_a is None:
                 # Create account and update database object
                 ff_a = self.__to_ff(a)
-                a.firefly_id = self.__client.create_account(ff_a)
-                a.firefly_type = str(ff_a.type)
-                self.__logger.debug(f'Account {a.name} created. Id={a.firefly_id}')
+                if ff_a is not None:
+                    a.firefly_id = self.__client.create_account(ff_a)
+                    a.firefly_type = str(ff_a.type)
+                    self.__logger.debug(f'Account {a.name} created. Id={a.firefly_id}')
 
-                index += 1
-                if index % 100 == 0:
-                    self.__logger.info(f'\t...{index} accounts created...')
+                    index += 1
+                    if index % 100 == 0:
+                        self.__logger.info(f'\t...{index} accounts created...')
+            else:
+                # If we have account, let's check if we want to disable it.
+                # We don't want to delete anything, so we will disable ignored accounts, too.
+                config = self.__accounts.get(ff_a.name)
+                if config is not None:
+                    if ff_a.attributes.active and (not config.active or config.ignore):
+                        self.__client.update_account(ff_a.id, AccountUpdate(name=ff_a.attributes.name, active=False,
+                                                                            include_net_worth=False))
+
         self.__logger.info(f'{index} accounts created in total')
         self.__db.add_accounts(db)
 
-    def __to_ff(self, account: Account) -> AccountStore:
+    def __to_ff(self, account: Account) -> AccountStore | None:
         # We have no account type and role in MoneyWiz, so in the db, too.
         # But we can use the config to get it.
-        mapping = self.__accounts.get(account.name)
+        config = self.__accounts.get(account.name)
+        if config is None or config.ignore:
+            return None
+
         account_type = ShortAccountTypeProperty(
-            mapping.type if mapping is not None and mapping.type else self.__settings.default_account_type)
+            config.type if config.type else self.__settings.default_account_type)
 
         ff = AccountStore(name=account.name, type=account_type, currency_code=account.currency.name)
+        ff.active = config.active
+        ff.include_net_worth = config.active
+        ff.opening_balance_date = to_datetime(config.opening_balance_date, '00:00')
+        ff.opening_balance = config.opening_balance
 
         if account_type == ShortAccountTypeProperty.ASSET:
             ff.account_role = AccountRoleProperty(
-                mapping.role if mapping is not None and mapping.role else self.__settings.default_account_role)
+                config.role if config.role else self.__settings.default_account_role)
             if ff.account_role == AccountRoleProperty.CCASSET:
                 ff.credit_card_type = CreditCardTypeProperty.MONTHLYFULL
-                ff.monthly_payment_date = self.__to_date(mapping.payment_date)
+                ff.monthly_payment_date = self.__to_date(config.payment_date)
 
         if account_type == ShortAccountTypeProperty.LIABILITY:
-            ff.liability_type = LiabilityTypeProperty(mapping.liability_type)
+            ff.liability_type = LiabilityTypeProperty(config.liability_type)
             ff.liability_direction = LiabilityDirectionProperty.DEBIT
-            ff.interest = mapping.interest
+            ff.interest = config.interest
 
         return ff
 

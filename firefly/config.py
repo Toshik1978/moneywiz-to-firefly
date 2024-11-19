@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, date
 from logging import Logger
 from pathlib import Path
 from typing import List, Optional
@@ -28,6 +29,18 @@ class AccountConfig:
 
     interest: Optional[str] = ''
     """Account interest rate."""
+
+    opening_balance_date: Optional[str] = ''
+    """Account opening balance date."""
+
+    opening_balance: Optional[str] = ''
+    """Account opening balance."""
+
+    active: Optional[bool] = False
+    """Is account active."""
+
+    ignore: Optional[bool] = False
+    """Should we ignore this account."""
 
 
 @dataclass_json

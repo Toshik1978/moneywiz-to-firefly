@@ -3,7 +3,7 @@ from typing import List, Mapping
 
 from firefly_iii_client import TransactionStore, TransactionSplitStore, TransactionTypeProperty
 
-from helpers import to_amount
+from helpers import to_amount, hash_key
 from firefly.client import FireflyClient
 from storage.scheme import Payment
 from storage.transactions import TransactionsDB
@@ -36,35 +36,51 @@ class PaymentExporter:
 
     def __sync_ff(self, db: List[Payment]) -> None:
         # Create payments in Firefly
+        # We want to create split transactions if it's possible
+        # Group by account_id -- payee_id -- date
+        mapping = self.__to_dict(db)
         index = 0
-        for p in db:
-            if p.firefly_id is None:
-                # Create transaction and update database object
+        for l in mapping.values():
+            # Add splits to the transaction
+            t = TransactionStore(transactions=[])
+            for p in l:
                 ff_p = self.__to_ff(p)
                 if ff_p.transactions[0].amount != '0.00':
-                    p.firefly_id = self.__client.create_transaction(ff_p)
-                    self.__logger.debug(f'Payment created. Id={p.firefly_id}')
+                    t.transactions.append(ff_p)
 
-                    index += 1
-                    if index % 100 == 0:
-                        self.__logger.info(f'\t...{index} payments created...')
+            if t.transactions:
+                firefly_id = self.__client.create_transaction(t)
+                self.__logger.debug(f'Payment created. Id={firefly_id}')
+                for p in l:
+                    p.firefly_id = firefly_id
+
+                index += len(t.transactions)
+                if index % 100 == 0:
+                    self.__logger.info(f'\t...{index} payments created...')
         self.__logger.info(f'{index} payments created in total')
         self.__db.add_payments(db)
 
-    def __to_ff(self, p: Payment) -> TransactionStore:
+    def __to_dict(self, db: List[Payment]) -> Mapping[str, List[Payment]]:
+        mapping = {}
+        for p in db:
+            key = hash_key(str(p.account_id), str(p.payee_id), p.date.strftime('%d-%m-%Y-%H-%M'))
+            if mapping.get(key) is None:
+                mapping[key] = []
+            mapping[key].append(p)
+        return mapping
+
+    def __to_ff(self, p: Payment) -> TransactionSplitStore:
         withdrawal = p.amount[0] == '-'
         account_id = self.__accounts[p.account_id]
         payee_id = self.__payees[p.payee_id] if p.payee_id else None
-        return TransactionStore(transactions=[
-            TransactionSplitStore(
-                type=TransactionTypeProperty.WITHDRAWAL if withdrawal else TransactionTypeProperty.DEPOSIT,
-                var_date=p.date,
-                amount=to_amount(p.amount),
-                source_id=account_id if withdrawal else payee_id,
-                destination_id=payee_id if withdrawal else account_id,
-                category_id=self.__categories[p.category_id] if p.category_id else None,
-                tags=[p.tag.name] if p.tag else None,
-                description=p.description if p.description else 'No description',
-                external_id=str(p.id),
-            )
-        ])
+        return TransactionSplitStore(
+            type=TransactionTypeProperty.WITHDRAWAL if withdrawal else TransactionTypeProperty.DEPOSIT,
+            var_date=p.date,
+            amount=to_amount(p.amount),
+            source_id=account_id if withdrawal else payee_id,
+            destination_id=payee_id if withdrawal else account_id,
+            category_id=self.__categories[p.category_id] if p.category_id else None,
+            tags=[p.tag.name] if p.tag else None,
+            description=p.description if p.description else 'No description',
+            external_id=str(p.id),
+        )

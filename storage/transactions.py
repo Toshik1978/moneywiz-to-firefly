@@ -70,16 +70,16 @@ class TransactionsDB:
             return [c for c in session.scalars(select(Account)).all()]
 
     def get_transfers(self) -> List[Transfer]:
-        """Get all transfers from DB."""
+        """Get all new transfers from DB."""
 
         with Session(self.__engine) as session:
-            return [c for c in session.scalars(select(Transfer)).all()]
+            return [c for c in session.scalars(select(Transfer).where(Transfer.firefly_id is None)).all()]
 
     def get_payments(self) -> List[Payment]:
-        """Get all payments from DB."""
+        """Get all new payments from DB."""
 
         with Session(self.__engine) as session:
-            return [c for c in session.scalars(select(Payment)).all()]
+            return [c for c in session.scalars(select(Payment).where(Payment.firefly_id is None)).all()]
 
     def add_currencies(self, currencies: List[Currency]) -> None:
         """Add new currencies to DB."""

@@ -4,7 +4,7 @@ from typing import List
 
 from firefly_iii_client import ApiClient, configuration, CurrenciesApi, CurrencyStore, AccountsApi, AccountStore, \
     CurrencyRead, AccountRead, CategoryRead, CategoriesApi, Category, TagRead, TagsApi, TagModelStore, TransactionRead, \
-    TransactionsApi, TransactionStore
+    TransactionsApi, TransactionStore, AccountUpdate
 
 
 class FireflyClient:
@@ -72,6 +72,11 @@ class FireflyClient:
 
         r = AccountsApi(self.__client).store_account(account, x_trace_id=str(uuid.uuid4()))
         return int(r.data.id)
+
+    def update_account(self, account_id: str, account: AccountUpdate) -> None:
+        """Update an account."""
+
+        AccountsApi(self.__client).update_account(id=account_id, account_update=account, x_trace_id=str(uuid.uuid4()))
 
     def get_categories(self) -> List[CategoryRead]:
         """Get categories on the server."""
