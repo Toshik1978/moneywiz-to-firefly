@@ -1,7 +1,7 @@
 import csv
 from logging import Logger
 
-from helpers import hash_key, replace_arrow
+from helpers import hash_key, filter_utf8
 from moneywiz.scheme import MwAccount, MwCurrency, MwTransfer, MwPayment, MwData, MwPayee, MwCategory, MwTag
 
 
@@ -63,7 +63,7 @@ class CsvImporter:
         self.__logger.debug(f'Parsing account and currency: {row["Name"]}')
 
         currency = self.__get_currency(row['Account'])
-        account = self.__get_account(row['Name'])
+        account = self.__get_account(filter_utf8(row['Name']))
         account.currency = currency.name
         account.balance = row['Current balance']
         self.__accounts[account.name] = account
@@ -71,17 +71,17 @@ class CsvImporter:
     def __parse_transfer(self, row: dict) -> None:
         self.__logger.debug(f'Parsing transfer: {row["Transfers"]}')
 
-        self.__parse_payee(row['Payee'], True)
-        self.__parse_category(replace_arrow(row['Category']))
+        self.__parse_payee(filter_utf8(row['Payee']), True)
+        self.__parse_category(filter_utf8(row['Category']))
         transfer = MwTransfer(
             source=row['Account'],
             target=row['Transfers'],
-            payee=row['Payee'],
+            payee=filter_utf8(row['Payee']),
             currency=row['Currency'],
             date=row['Date'],
             time=row['Time'],
-            category=replace_arrow(row['Category']),
-            description=row['Description'],
+            category=filter_utf8(row['Category']),
+            description=filter_utf8(row['Description']),
             amount=row['Amount'],
             balance=row['Balance'],
         )
@@ -90,14 +90,14 @@ class CsvImporter:
     def __parse_payment(self, row: dict) -> None:
         self.__logger.debug(f'Parsing transaction: {row["Description"]}')
 
-        self.__parse_payee(row['Payee'], row['Amount'][0] == '-')
-        self.__parse_category(replace_arrow(row['Category']))
+        self.__parse_payee(filter_utf8(row['Payee']), row['Amount'][0] == '-')
+        self.__parse_category(filter_utf8(row['Category']))
         self.__parse_tag(row['Tags'].rstrip('; '))
         payment = MwPayment(
             account=row['Account'],
-            payee=row['Payee'],
-            category=replace_arrow(row['Category']),
-            description=row['Description'],
+            payee=filter_utf8(row['Payee']),
+            category=filter_utf8(row['Category']),
+            description=filter_utf8(row['Description']),
             date=row['Date'],
             time=row['Time'],
             amount=row['Amount'],

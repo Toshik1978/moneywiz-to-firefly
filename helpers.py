@@ -20,7 +20,9 @@ def to_amount(amount: str) -> str:
     return re.sub('[-+,]', '', amount)
 
 
-def replace_arrow(text: str) -> str:
-    """Replace arrow sign in the string."""
+def filter_utf8(text: str) -> str:
+    """Replace some utf-8 symbols."""
 
-    return text.replace(b'\xe2\x96\xb6\xef\xb8\x8e'.decode('utf-8'), '-')
+    return (text.
+            replace(b'\xe2\x96\xb6\xef\xb8\x8e'.decode('utf-8'), '-').
+            replace(b'\xc2\xa0'.decode('utf-8'), ' '))
