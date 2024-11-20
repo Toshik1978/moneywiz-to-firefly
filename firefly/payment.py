@@ -63,7 +63,7 @@ class PaymentExporter:
     def __to_dict(self, db: List[Payment]) -> Mapping[str, List[Payment]]:
         mapping = {}
         for p in db:
-            key = hash_key(str(p.account_id), str(p.payee_id), p.date.strftime('%d-%m-%Y-%H-%M'))
+            key = hash_key(str(p.account.name), str(p.payee.name), p.date.strftime('%d-%m-%Y-%H-%M'))
             if mapping.get(key) is None:
                 mapping[key] = []
             mapping[key].append(p)
