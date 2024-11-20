@@ -45,7 +45,7 @@ class PaymentExporter:
             t = TransactionStore(transactions=[])
             for p in l:
                 ff_p = self.__to_ff(p)
-                if ff_p.transactions[0].amount != '0.00':
+                if ff_p.amount != '0.00':
                     t.transactions.append(ff_p)
 
             if t.transactions:
