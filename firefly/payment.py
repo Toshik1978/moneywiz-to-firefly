@@ -38,27 +38,31 @@ class PaymentExporter:
         # Create payments in Firefly
         # We want to create split transactions if it's possible
         # Group by account_id -- payee_id -- date
-        mapping = self.__to_dict(db)
         index = 0
-        for l in mapping.values():
-            # Add splits to the transaction
-            t = TransactionStore(transactions=[])
-            for p in l:
-                ff_p = self.__to_ff(p)
-                if ff_p.amount != '0.00':
-                    t.transactions.append(ff_p)
-
-            if t.transactions:
-                firefly_id = self.__client.create_transaction(t)
-                self.__logger.debug(f'Payment created. Id={firefly_id}')
+        try:
+            mapping = self.__to_dict(db)
+            for l in mapping.values():
+                # Add splits to the transaction
+                t = TransactionStore(transactions=[])
                 for p in l:
-                    p.firefly_id = firefly_id
+                    ff_p = self.__to_ff(p)
+                    if ff_p.amount != '0.00':
+                        t.transactions.append(ff_p)
 
-                index += len(t.transactions)
-                if index % 100 == 0:
-                    self.__logger.info(f'\t...{index} payments created...')
-        self.__logger.info(f'{index} payments created in total')
-        self.__db.add_payments(db)
+                if t.transactions:
+                    if len(t.transactions) > 1:
+                        t.group_title = l[0].payee.name
+                    firefly_id = self.__client.create_transaction(t)
+                    self.__logger.debug(f'Payment created. Id={firefly_id}')
+                    for p in l:
+                        p.firefly_id = firefly_id
+
+                    index += len(t.transactions)
+                    if index % 100 == 0:
+                        self.__logger.info(f'\t...{index} payments created...')
+        finally:
+            self.__logger.info(f'{index} payments created in total')
+            self.__db.add_payments(db)
 
     def __to_dict(self, db: List[Payment]) -> Mapping[str, List[Payment]]:
         mapping = {}

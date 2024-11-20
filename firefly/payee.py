@@ -46,18 +46,20 @@ class PayeeExporter:
     def __sync_ff(self, db: List[Payee], ff: List[AccountRead]) -> None:
         # Create payee in Firefly
         index = 0
-        mapping = {hash_key(str(p.attributes.name), str(p.attributes.type)): p for p in ff}
-        for p in db:
-            ff_p = mapping.get(hash_key(
-                p.name, str(ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE)))
-            if ff_p is None:
-                # Create payee and update database object
-                p.firefly_id = self.__client.create_account(AccountStore(name=p.name,
-                                                                         type=ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE))
-                self.__logger.debug(f'Payee {p.name} created. Id={p.firefly_id}')
+        try:
+            mapping = {hash_key(str(p.attributes.name), str(p.attributes.type)): p for p in ff}
+            for p in db:
+                ff_p = mapping.get(hash_key(
+                    p.name, str(ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE)))
+                if ff_p is None:
+                    # Create payee and update database object
+                    p.firefly_id = self.__client.create_account(AccountStore(name=p.name,
+                                                                             type=ShortAccountTypeProperty.EXPENSE if p.expense else ShortAccountTypeProperty.REVENUE))
+                    self.__logger.debug(f'Payee {p.name} created. Id={p.firefly_id}')
 
-                index += 1
-                if index % 100 == 0:
-                    self.__logger.info(f'\t...{index} payees created...')
-        self.__logger.info(f'{index} payees created in total')
-        self.__db.add_payees(db)
+                    index += 1
+                    if index % 100 == 0:
+                        self.__logger.info(f'\t...{index} payees created...')
+        finally:
+            self.__logger.info(f'{index} payees created in total')
+            self.__db.add_payees(db)

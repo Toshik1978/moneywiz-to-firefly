@@ -43,15 +43,17 @@ class CurrencyExporter:
 
     def __sync_ff(self, db: List[Currency], ff: List[CurrencyRead]) -> None:
         # Enable or create currency in Firefly
-        mapping = {c.attributes.code: c for c in ff}
-        for c in db:
-            ff_c = mapping.get(c.name)
-            if ff_c is None:
-                # Create currency and update database object
-                c.firefly_id = self.__client.create_currency(CurrencyStore(code=c.name, name=c.name, symbol=c.name))
-                self.__logger.debug(f'Currency {c.name} created. Id={c.firefly_id}')
-            elif ff_c and not ff_c.attributes.enabled:
-                # Enable currency
-                self.__client.enable_currency(ff_c.attributes.code)
-                self.__logger.debug(f'Currency {c.name} enabled')
-        self.__db.add_currencies(db)
+        try:
+            mapping = {c.attributes.code: c for c in ff}
+            for c in db:
+                ff_c = mapping.get(c.name)
+                if ff_c is None:
+                    # Create currency and update database object
+                    c.firefly_id = self.__client.create_currency(CurrencyStore(code=c.name, name=c.name, symbol=c.name))
+                    self.__logger.debug(f'Currency {c.name} created. Id={c.firefly_id}')
+                elif ff_c and not ff_c.attributes.enabled:
+                    # Enable currency
+                    self.__client.enable_currency(ff_c.attributes.code)
+                    self.__logger.debug(f'Currency {c.name} enabled')
+        finally:
+            self.__db.add_currencies(db)

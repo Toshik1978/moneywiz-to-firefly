@@ -48,19 +48,21 @@ class TransferExporter:
     def __sync_ff(self, db: List[Transfer]) -> None:
         # Create transfer in Firefly
         index = 0
-        for t in db:
-            # Create transaction and update database object
-            # It's possible to have split transfers, but we don't care and create them separately!
-            ff_t = self.__to_ff(t)
-            if ff_t.transactions[0].amount != '0.00':
-                t.firefly_id = self.__client.create_transaction(ff_t)
-                self.__logger.debug(f'Transfer created. Id={t.firefly_id}')
+        try:
+            for t in db:
+                # Create transaction and update database object
+                # It's possible to have split transfers, but we don't care and create them separately!
+                ff_t = self.__to_ff(t)
+                if ff_t.transactions[0].amount != '0.00':
+                    t.firefly_id = self.__client.create_transaction(ff_t)
+                    self.__logger.debug(f'Transfer created. Id={t.firefly_id}')
 
-                index += 1
-                if index % 100 == 0:
-                    self.__logger.info(f'\t...{index} transfers created...')
-        self.__logger.info(f'{index} transfers created in total')
-        self.__db.add_transfers(db)
+                    index += 1
+                    if index % 100 == 0:
+                        self.__logger.info(f'\t...{index} transfers created...')
+        finally:
+            self.__logger.info(f'{index} transfers created in total')
+            self.__db.add_transfers(db)
 
     def __to_ff(self, t: Transfer) -> TransactionStore:
         if self.__accounts[t.target_id].firefly_type == str(ShortAccountTypeProperty.LIABILITY):

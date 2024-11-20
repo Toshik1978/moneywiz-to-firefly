@@ -43,11 +43,13 @@ class CategoryExporter:
 
     def __sync_ff(self, db: List[Category], ff: List[CategoryRead]) -> None:
         # Create category in Firefly
-        mapping = {c.attributes.name: c for c in ff}
-        for c in db:
-            ff_c = mapping.get(c.name)
-            if ff_c is None:
-                # Create category and update database object
-                c.firefly_id = self.__client.create_category(CategoryStore(name=c.name))
-                self.__logger.debug(f'Category {c.name} created. Id={c.firefly_id}')
-        self.__db.add_categories(db)
+        try:
+            mapping = {c.attributes.name: c for c in ff}
+            for c in db:
+                ff_c = mapping.get(c.name)
+                if ff_c is None:
+                    # Create category and update database object
+                    c.firefly_id = self.__client.create_category(CategoryStore(name=c.name))
+                    self.__logger.debug(f'Category {c.name} created. Id={c.firefly_id}')
+        finally:
+            self.__db.add_categories(db)
