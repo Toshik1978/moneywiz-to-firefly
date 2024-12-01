@@ -1,3 +1,4 @@
+import uuid
 from logging import Logger
 from typing import List, Mapping
 
@@ -67,7 +68,8 @@ class PaymentExporter:
     def __to_dict(self, db: List[Payment]) -> Mapping[str, List[Payment]]:
         mapping = {}
         for p in db:
-            key = hash_key(str(p.account.name), str(p.payee.name), p.date.strftime('%d-%m-%Y-%H-%M'))
+            payee = p.payee.name if p.payee else uuid.uuid4().hex # Unique Payee name in case it can't be split
+            key = hash_key(str(p.account.name), payee, p.date.strftime('%d-%m-%Y-%H-%M'))
             if mapping.get(key) is None:
                 mapping[key] = []
             mapping[key].append(p)
