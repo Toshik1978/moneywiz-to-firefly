@@ -6,11 +6,13 @@ set -u
 # Show usage
 usage() {
     cat << USAGE
-Update Firefly III with the new exported report
+Update Firefly III with the newly exported report
 Usage:
-    $(basename $0) csv_report_file
+    $(basename $0) [options] csv_report_file
 
 Options:
+    -i, --import   Do only the report import
+    -e, --export   Do only the database export
     -h, --help     This help output
     -V, --version  Show version
 
@@ -26,6 +28,9 @@ USAGE
     fi
 }
 
+IMPORT=0
+EXPORT=0
+
 # Parse parameters
 while [ "${1+isset}" ]; do
     case "$1" in
@@ -33,8 +38,14 @@ while [ "${1+isset}" ]; do
             usage
         ;;
         -V|--version)
-            echo "$(basename $0)-1.0"
+            echo "$(basename $0)-1.1"
             exit 0
+        ;;
+        -i|--import)
+            IMPORT=1
+        ;;
+        -e|--export)
+            EXPORT=1
         ;;
         --)
             break
@@ -49,21 +60,38 @@ while [ "${1+isset}" ]; do
     shift
 done
 
-# If empty parameters - show usage
-[ -z "$*" ] && usage
+# It's either 0 or 1, but we should force to 1
+if [[ ${IMPORT} = "${EXPORT}" ]]; then
+  IMPORT=1
+  EXPORT=1
+fi
 
-REPORT_FILE_PATH="$1"
-REPORT_FILE_NAME=$(basename ${REPORT_FILE_PATH})
+# If empty parameters - show usage
+[ -z "$*" ] && [ ${IMPORT} = "1" ] && usage
+
+# Properly configure import/export commands
 SERVER="datron-server"
 SERVER_PATH="/srv/backup/finances/"
 
-# Copy new report to the server
-scp "$REPORT_FILE_PATH" "${SERVER}:${SERVER_PATH}reports/"
+IMPORT_CMD=""
+EXPORT_CMD=""
 
-# Run import and export remotely
-ssh $SERVER -t "set -e; pushd Development/moneywiz-to-firefly; \
+if [[ ${IMPORT} = "1" ]]; then
+  REPORT_FILE_PATH="$1"
+  scp "$REPORT_FILE_PATH" "${SERVER}:${SERVER_PATH}reports/"
+
+  REPORT_FILE_NAME=$(basename ${REPORT_FILE_PATH})
+  IMPORT_CMD="./moneywiz-to-firefly --dbpath ${SERVER_PATH}db ${SERVER_PATH}reports/${REPORT_FILE_NAME};"
+fi
+if [[ ${EXPORT} = "1" ]]; then
+  EXPORT_CMD="./moneywiz-to-firefly --dbpath ${SERVER_PATH}db --config ${SERVER_PATH}config.json --export;"
+fi
+
+COMMAND="set -e; pushd Development/moneywiz-to-firefly; \
 source .venv/bin/activate; \
-./moneywiz-to-firefly --dbpath ${SERVER_PATH}db ${SERVER_PATH}reports/${REPORT_FILE_NAME}; \
-./moneywiz-to-firefly --dbpath ${SERVER_PATH}db --config ${SERVER_PATH}config.json --export; \
+${IMPORT_CMD}${EXPORT_CMD} \
 deactivate; \
 popd"
+
+# Run command remotely
+ssh $SERVER -t "${COMMAND}"
