@@ -78,6 +78,7 @@ EXPORT_CMD=""
 
 if [[ ${IMPORT} = "1" ]]; then
   REPORT_FILE_PATH="$1"
+  sed -i '' '1d' $REPORT_FILE_PATH
   scp "$REPORT_FILE_PATH" "${SERVER}:${SERVER_PATH}reports/"
 
   REPORT_FILE_NAME=$(basename ${REPORT_FILE_PATH})
