@@ -81,6 +81,42 @@ class TransactionsDB:
         with Session(self.__engine) as session:
             return [c for c in session.scalars(select(Payment).filter(Payment.firefly_id.is_(None))).all()]
 
+    def check_transfer(self, t: Transfer) -> bool:
+        """Check if transfer exists in DB."""
+
+        with Session(self.__engine) as session:
+            return session.scalars(
+                select(Transfer)
+                .where(Transfer.source_id == t.source_id)
+                .where(Transfer.target_id == t.target_id)
+                .where(Transfer.payee_id == t.payee_id)
+                .where(Transfer.category_id == t.category_id)
+                .where(Transfer.description == t.description)
+                .where(Transfer.date == t.date)
+                .where(Transfer.source_amount == t.source_amount)
+                .where(Transfer.source_currency_id == t.source_currency_id)
+                .where(Transfer.source_balance == t.source_balance)
+                .where(Transfer.target_amount == t.target_amount)
+                .where(Transfer.target_currency_id == t.target_currency_id)
+                .where(Transfer.target_balance == t.target_balance)
+            ).first() is not None
+
+    def check_payment(self, p: Payment) -> bool:
+        """Check if payment exists in DB."""
+
+        with Session(self.__engine) as session:
+            return session.scalars(
+                select(Payment)
+                .where(Payment.account_id == p.account_id)
+                .where(Payment.payee_id == p.payee_id)
+                .where(Payment.category_id == p.category_id)
+                .where(Payment.description == p.description)
+                .where(Payment.date == p.date)
+                .where(Payment.amount == p.amount)
+                .where(Payment.balance == p.balance)
+                .where(Payment.tag_id == p.tag_id)
+            ).first() is not None
+
     def add_currencies(self, currencies: List[Currency]) -> None:
         """Add new currencies to DB."""
 

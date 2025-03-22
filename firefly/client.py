@@ -59,7 +59,7 @@ class FireflyClient:
         accounts = []
 
         while True:
-            r = api.list_account(x_trace_id=str(uuid.uuid4()), limit=1000, page=page)
+            r = api.list_account(x_trace_id=str(uuid.uuid4()), limit=2000, page=page)
             accounts.extend(r.data)
             if r.meta.pagination.current_page == r.meta.pagination.total_pages:
                 break
@@ -86,7 +86,7 @@ class FireflyClient:
         categories = []
 
         while True:
-            r = api.list_category(x_trace_id=str(uuid.uuid4()), limit=1000, page=page)
+            r = api.list_category(x_trace_id=str(uuid.uuid4()), limit=2000, page=page)
             categories.extend(r.data)
             if r.meta.pagination.current_page == r.meta.pagination.total_pages:
                 break
@@ -121,22 +121,6 @@ class FireflyClient:
 
         r = TagsApi(self.__client).store_tag(tag, x_trace_id=str(uuid.uuid4()))
         return int(r.data.id)
-
-    def get_transactions(self) -> List[TransactionRead]:
-        """Get transactions on the server."""
-
-        api = TransactionsApi(self.__client)
-        page = 1
-        transactions = []
-
-        while True:
-            r = api.list_transaction(x_trace_id=str(uuid.uuid4()), limit=1000, page=page)
-            transactions.extend(r.data)
-            if r.meta.pagination.current_page == r.meta.pagination.total_pages:
-                break
-            page += 1
-
-        return transactions
 
     def create_transaction(self, transaction: TransactionStore) -> int:
         """Create a new transaction."""

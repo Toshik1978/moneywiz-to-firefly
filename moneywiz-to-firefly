@@ -16,13 +16,14 @@ from moneywiz.analyzer import CsvAnalyzer
 
 @click.command()
 @click.option('--dbpath', default='.db', type=click.Path(exists=False), help='DB directory')
+@click.option('--dedup', is_flag=True, default=False, help='Deduplicate payments')
 @click.option('--url', help='Firefly III URL')
 @click.option('--token', help='Firefly III token')
 @click.option('--export/--import', is_flag=True, default=False, help='Export or import mode')
 @click.option('--config', type=click.Path(exists=True), help='Configuration file for export')
 @click.option('-v', is_flag=True, default=False, help='Verbose logging')
 @click.argument('filename', type=click.Path(exists=True), required=False)
-def cli(dbpath, url, token, export, config, v, filename):
+def cli(dbpath, dedup, url, token, export, config, v, filename):
     logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG if v else logging.WARN)
     logging.getLogger("firefly_iii_client").setLevel(logging.DEBUG if v else logging.WARN)
     logging.getLogger("urllib3").setLevel(logging.DEBUG if v else logging.WARN)
@@ -40,7 +41,7 @@ def cli(dbpath, url, token, export, config, v, filename):
 
         try:
             data = importer.parse(filename)
-            analyzer.analyze(data)
+            analyzer.analyze(data, dedup)
             analyzer.commit()
         except Exception as e:
             logger.error(f'Failed to import CSV file: {e}', exc_info=True)

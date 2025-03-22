@@ -1,3 +1,4 @@
+from itertools import filterfalse
 from logging import Logger
 from typing import List
 
@@ -30,7 +31,7 @@ class CsvAnalyzer:
         self.__logger = logger
         self.__db = db
 
-    def analyze(self, mw: MwData) -> None:
+    def analyze(self, mw: MwData, dedup: bool) -> None:
         """Run data analysis."""
 
         self.__logger.info('Analyzing MoneyWiz CSV...')
@@ -47,6 +48,10 @@ class CsvAnalyzer:
         self.__payments = PaymentAnalyzer(self.__logger, self.__payees, self.__categories, self.__tags,
                                           self.__accounts).analyze(mw.payments).get()
 
+        if dedup:
+            self.__deduplicate_transfers()
+            self.__deduplicate_payments()
+
         self.__logger.info('Analyzing MoneyWiz CSV... Done')
 
     def commit(self) -> None:
@@ -61,3 +66,15 @@ class CsvAnalyzer:
         self.__db.add_transfers(self.__transfers)
         self.__db.add_payments(self.__payments)
         self.__logger.info(f'Committed changes')
+
+    def __deduplicate_transfers(self) -> None:
+        """Deduplicate transfers."""
+
+        # Check if we have transfers in DB already and remove them
+        self.__transfers[:] = filterfalse(lambda t: not self.__db.check_transfer(t), self.__transfers)
+
+    def __deduplicate_payments(self) -> None:
+        """Deduplicate payments."""
+
+        # Check if we have payments in DB already and remove them
+        self.__payments[:] = filterfalse(lambda t: not self.__db.check_payment(t), self.__payments)
