@@ -84,37 +84,49 @@ class TransactionsDB:
     def check_transfer(self, t: Transfer) -> bool:
         """Check if transfer exists in DB."""
 
+        source_id = None if t.source is None else t.source.id
+        target_id = None if t.target is None else t.target.id
+        payee_id = None if t.payee is None else t.payee.id
+        category_id = None if t.category is None else t.category.id
+        source_currency_id = None if t.source_currency is None else t.source_currency.id
+        target_currency_id = None if t.target_currency is None else t.target_currency.id
+
         with Session(self.__engine) as session:
             return session.scalars(
                 select(Transfer)
-                .where(Transfer.source_id == None if t.source is None else t.source.id)
-                .where(Transfer.target_id == None if t.target is None else t.target.id)
-                .where(Transfer.payee_id == None if t.payee is None else t.payee.id)
-                .where(Transfer.category_id == None if t.category is None else t.category.id)
+                .where(Transfer.source_id == source_id)
+                .where(Transfer.target_id == target_id)
+                .where(Transfer.payee_id == payee_id)
+                .where(Transfer.category_id == category_id)
                 .where(Transfer.description == t.description)
                 .where(Transfer.date == t.date)
                 .where(Transfer.source_amount == t.source_amount)
-                .where(Transfer.source_currency_id == None if t.source_currency is None else t.source_currency.id)
+                .where(Transfer.source_currency_id == source_currency_id)
                 .where(Transfer.source_balance == t.source_balance)
                 .where(Transfer.target_amount == t.target_amount)
-                .where(Transfer.target_currency_id == None if t.target_currency is None else t.target_currency.id)
+                .where(Transfer.target_currency_id == target_currency_id)
                 .where(Transfer.target_balance == t.target_balance)
             ).first() is not None
 
     def check_payment(self, p: Payment) -> bool:
         """Check if payment exists in DB."""
 
+        account_id = None if p.account is None else p.account.id
+        payee_id = None if p.payee is None else p.payee.id
+        category_id = None if p.category is None else p.category.id
+        tag_id = None if p.tag is None else p.tag.id
+
         with Session(self.__engine) as session:
             return session.scalars(
                 select(Payment)
-                .where(Payment.account_id == None if p.account is None else p.account.id)
-                .where(Payment.payee_id == None if p.payee is None else p.payee.id)
-                .where(Payment.category_id == None if p.category is None else p.category.id)
+                .where(Payment.account_id == account_id)
+                .where(Payment.payee_id == payee_id)
+                .where(Payment.category_id == category_id)
                 .where(Payment.description == p.description)
                 .where(Payment.date == p.date)
                 .where(Payment.amount == p.amount)
                 .where(Payment.balance == p.balance)
-                .where(Payment.tag_id == None if p.tag is None else p.tag.id)
+                .where(Payment.tag_id == tag_id)
             ).first() is not None
 
     def add_currencies(self, currencies: List[Currency]) -> None:
