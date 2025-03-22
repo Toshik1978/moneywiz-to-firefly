@@ -102,10 +102,8 @@ class TransactionsDB:
                 .where(Transfer.date == t.date)
                 .where(Transfer.source_amount == t.source_amount)
                 .where(Transfer.source_currency_id == source_currency_id)
-                .where(Transfer.source_balance == t.source_balance)
                 .where(Transfer.target_amount == t.target_amount)
                 .where(Transfer.target_currency_id == target_currency_id)
-                .where(Transfer.target_balance == t.target_balance)
             ).first()
 
     def find_payment(self, p: Payment) -> Payment|None:
@@ -125,7 +123,6 @@ class TransactionsDB:
                 .where(Payment.description == p.description)
                 .where(Payment.date == p.date)
                 .where(Payment.amount == p.amount)
-                .where(Payment.balance == p.balance)
                 .where(Payment.tag_id == tag_id)
             ).first()
 

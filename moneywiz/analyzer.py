@@ -77,7 +77,7 @@ class CsvAnalyzer:
             if dup is not None:
                 self.__logger.info(f'Duplicate transfer {t.description} found. Id={dup.firefly_id}')
             return True
-        self.__transfers[:] = filterfalse(is_duplicate, self.__transfers)
+        self.__transfers = list(filterfalse(is_duplicate, self.__transfers))
         self.__logger.info(f'Removed {count - len(self.__transfers)} from {count} duplicate transfers')
 
     def __deduplicate_payments(self) -> None:
@@ -90,5 +90,5 @@ class CsvAnalyzer:
             if dup is not None:
                 self.__logger.info(f'Duplicate payment {p.description} found. Id={dup.firefly_id}')
             return True
-        self.__payments[:] = filterfalse(is_duplicate, self.__payments)
+        self.__payments = list(filterfalse(is_duplicate, self.__payments))
         self.__logger.info(f'Removed {count - len(self.__payments)} from {count} duplicate payments')
