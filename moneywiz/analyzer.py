@@ -74,7 +74,7 @@ class CsvAnalyzer:
         def is_unique_transfer(t: Transfer) -> bool:
             dup = self.__db.check_transfer(t)
             if dup:
-                self.__logger.debug(f'Duplicate transfer {t.description} found. Id={t.firefly_id}')
+                self.__logger.info(f'Duplicate transfer {t.description} found. Id={t.firefly_id}')
             return not dup
         self.__transfers[:] = filterfalse(is_unique_transfer, self.__transfers)
 
@@ -85,6 +85,6 @@ class CsvAnalyzer:
         def is_unique_payment(p: Payment) -> bool:
             dup = self.__db.check_payment(p)
             if dup:
-                self.__logger.debug(f'Duplicate payment {p.description} found. Id={p.firefly_id}')
+                self.__logger.info(f'Duplicate payment {p.description} found. Id={p.firefly_id}')
             return not dup
         self.__payments[:] = filterfalse(is_unique_payment, self.__payments)
