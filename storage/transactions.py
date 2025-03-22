@@ -87,17 +87,17 @@ class TransactionsDB:
         with Session(self.__engine) as session:
             return session.scalars(
                 select(Transfer)
-                .where(Transfer.source_id == t.source.id)
-                .where(Transfer.target_id == t.target.id)
-                .where(Transfer.payee_id == t.payee.id)
-                .where(Transfer.category_id == t.category.id)
+                .where(Transfer.source_id == None if t.source is None else t.source.id)
+                .where(Transfer.target_id == None if t.target is None else t.target.id)
+                .where(Transfer.payee_id == None if t.payee is None else t.payee.id)
+                .where(Transfer.category_id == None if t.category is None else t.category.id)
                 .where(Transfer.description == t.description)
                 .where(Transfer.date == t.date)
                 .where(Transfer.source_amount == t.source_amount)
-                .where(Transfer.source_currency_id == t.source_currency.id)
+                .where(Transfer.source_currency_id == None if t.source_currency is None else t.source_currency.id)
                 .where(Transfer.source_balance == t.source_balance)
                 .where(Transfer.target_amount == t.target_amount)
-                .where(Transfer.target_currency_id == t.target_currency.id)
+                .where(Transfer.target_currency_id == None if t.target_currency is None else t.target_currency.id)
                 .where(Transfer.target_balance == t.target_balance)
             ).first() is not None
 
@@ -107,14 +107,14 @@ class TransactionsDB:
         with Session(self.__engine) as session:
             return session.scalars(
                 select(Payment)
-                .where(Payment.account_id == p.account.id)
-                .where(Payment.payee_id == p.payee.id)
-                .where(Payment.category_id == p.category.id)
+                .where(Payment.account_id == None if p.account is None else p.account.id)
+                .where(Payment.payee_id == None if p.payee is None else p.payee.id)
+                .where(Payment.category_id == None if p.category is None else p.category.id)
                 .where(Payment.description == p.description)
                 .where(Payment.date == p.date)
                 .where(Payment.amount == p.amount)
                 .where(Payment.balance == p.balance)
-                .where(Payment.tag_id == p.tag.id)
+                .where(Payment.tag_id == None if p.tag is None else p.tag.id)
             ).first() is not None
 
     def add_currencies(self, currencies: List[Currency]) -> None:
