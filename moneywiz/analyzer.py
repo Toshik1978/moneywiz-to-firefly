@@ -71,10 +71,20 @@ class CsvAnalyzer:
         """Deduplicate transfers."""
 
         # Check if we have transfers in DB already and remove them
-        self.__transfers[:] = filterfalse(lambda t: not self.__db.check_transfer(t), self.__transfers)
+        def is_unique_transfer(t: Transfer) -> bool:
+            dup = self.__db.check_transfer(t)
+            if dup:
+                self.__logger.debug(f'Duplicate transfer {t.description} found. Id={t.firefly_id}')
+            return not dup
+        self.__transfers[:] = filterfalse(is_unique_transfer, self.__transfers)
 
     def __deduplicate_payments(self) -> None:
         """Deduplicate payments."""
 
         # Check if we have payments in DB already and remove them
-        self.__payments[:] = filterfalse(lambda t: not self.__db.check_payment(t), self.__payments)
+        def is_unique_payment(p: Payment) -> bool:
+            dup = self.__db.check_payment(p)
+            if dup:
+                self.__logger.debug(f'Duplicate payment {p.description} found. Id={p.firefly_id}')
+            return not dup
+        self.__payments[:] = filterfalse(is_unique_payment, self.__payments)
