@@ -1,5 +1,5 @@
-click==8.1.8
-python-dotenv==1.0.1
-SQLAlchemy==2.0.38
-Firefly-III-API-Client==6.1.24.0
+click==8.2.1
+python-dotenv==1.1.1
+SQLAlchemy==2.0.43
+Firefly-III-API-Client==6.2.21.0
 dataclasses-json==0.6.7
