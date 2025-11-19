@@ -25,4 +25,5 @@ def filter_utf8(text: str) -> str:
 
     return (text.
             replace(b'\xe2\x96\xb6\xef\xb8\x8e'.decode('utf-8'), '-').
+            replace(b'\xe2\x96\xba'.decode('utf-8'), '-').
             replace(b'\xc2\xa0'.decode('utf-8'), ' '))

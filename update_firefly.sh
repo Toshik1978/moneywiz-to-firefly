@@ -82,7 +82,7 @@ if [[ ${IMPORT} = "1" ]]; then
   scp "$REPORT_FILE_PATH" "${SERVER}:${SERVER_PATH}reports/"
 
   REPORT_FILE_NAME=$(basename ${REPORT_FILE_PATH})
-  IMPORT_CMD="./moneywiz-to-firefly --dbpath ${SERVER_PATH}db ${SERVER_PATH}reports/${REPORT_FILE_NAME};"
+  IMPORT_CMD="./moneywiz-to-firefly --dedup --dbpath ${SERVER_PATH}db ${SERVER_PATH}reports/${REPORT_FILE_NAME};"
 fi
 if [[ ${EXPORT} = "1" ]]; then
   EXPORT_CMD="./moneywiz-to-firefly --dbpath ${SERVER_PATH}db --config ${SERVER_PATH}config.json --export;"
