@@ -3,3 +3,4 @@ python-dotenv==1.1.1
 SQLAlchemy==2.0.43
 Firefly-III-API-Client==6.2.21.0
 dataclasses-json==0.6.7
+urllib3==2.5.0
