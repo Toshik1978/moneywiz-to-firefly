@@ -30,7 +30,7 @@ class AccountAnalyzer:
                 mapping[a.name].balance = a.balance
         # Add new accounts
         self.__accounts.extend(
-            [Account(name=a.name, currency=self.__currencies.get(a.currency), balance=a.balance) for a in accounts if
+            [Account(name=a.name, currency_id=self.__currencies.get(a.currency).id, balance=a.balance) for a in accounts if
              a.name not in mapping])
 
         self.__validate()
@@ -43,6 +43,6 @@ class AccountAnalyzer:
         return self.__accounts
 
     def __validate(self) -> None:
-        accounts = [account.name for account in self.__accounts if account.currency is None]
+        accounts = [account.name for account in self.__accounts if account.currency_id is None]
         if accounts:
             raise AnalyzerException(f'Orphaned accounts detected: {accounts}')
