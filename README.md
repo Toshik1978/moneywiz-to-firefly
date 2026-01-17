@@ -4,5 +4,4 @@ It can automatically parse account creation and transfer records. It doesn't pro
 
 ## Usage
 1. Clone repository
-2. Install dependencies with `make code.deps`
-3. Run application with `moneywiz-to-firefly`
+2. Run application with `moneywiz-to-firefly`

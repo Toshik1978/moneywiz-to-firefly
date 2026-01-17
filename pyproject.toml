@@ -1,0 +1,14 @@
+[project]
+name = "moneywiz-to-firefly"
+version = "1.0.0"
+description = "Migrate MoneyWiz exported CSV transaction files to Firefly III"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "click==8.2.1",
+    "dataclasses-json==0.6.7",
+    "firefly-iii-api-client==6.2.21.0",
+    "python-dotenv==1.1.1",
+    "sqlalchemy==2.0.43",
+    "urllib3==2.5.0",
+]
