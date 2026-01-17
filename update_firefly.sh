@@ -82,17 +82,11 @@ if [[ ${IMPORT} = "1" ]]; then
   scp "$REPORT_FILE_PATH" "${SERVER}:${SERVER_PATH}reports/"
 
   REPORT_FILE_NAME=$(basename ${REPORT_FILE_PATH})
-  IMPORT_CMD="./moneywiz-to-firefly --dedup --dbpath ${SERVER_PATH}db ${SERVER_PATH}reports/${REPORT_FILE_NAME};"
+  IMPORT_CMD="uv run --directory ~/Development/moneywiz-to-firefly ~/Development/moneywiz-to-firefly/moneywiz-to-firefly --dedup --dbpath ${SERVER_PATH}db ${SERVER_PATH}reports/${REPORT_FILE_NAME};"
 fi
 if [[ ${EXPORT} = "1" ]]; then
-  EXPORT_CMD="./moneywiz-to-firefly --dbpath ${SERVER_PATH}db --config ${SERVER_PATH}config.json --export;"
+  EXPORT_CMD="uv run --directory ~/Development/moneywiz-to-firefly ~/Development/moneywiz-to-firefly/moneywiz-to-firefly --dbpath ${SERVER_PATH}db --config ${SERVER_PATH}config.json --export;"
 fi
 
-COMMAND="set -e; pushd Development/moneywiz-to-firefly; \
-source .venv/bin/activate; \
-${IMPORT_CMD}${EXPORT_CMD} \
-deactivate; \
-popd"
-
 # Run command remotely
-ssh $SERVER -t "${COMMAND}"
+ssh $SERVER -t "${IMPORT_CMD}${EXPORT_CMD}"
