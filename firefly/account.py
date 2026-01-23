@@ -92,7 +92,7 @@ class AccountExporter:
         ff = AccountStore(name=account.name, type=account_type, currency_code=account.currency.name)
         ff.active = config.active
         ff.include_net_worth = config.active
-        if config.opening_balance_date is not None:
+        if config.opening_balance_date:
             ff.opening_balance_date = to_datetime(config.opening_balance_date, '00:00')
             ff.opening_balance = config.opening_balance
 
