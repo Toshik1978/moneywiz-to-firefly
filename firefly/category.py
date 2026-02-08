@@ -1,7 +1,7 @@
 from logging import Logger
 from typing import List
 
-from firefly_iii_client import Category as CategoryStore, CategoryRead
+from firefly_iii_client import CategoryStore, CategoryRead
 
 from firefly.client import FireflyClient
 from storage.scheme import Category

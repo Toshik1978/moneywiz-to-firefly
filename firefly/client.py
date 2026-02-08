@@ -3,7 +3,7 @@ from logging import Logger
 from typing import List
 
 from firefly_iii_client import ApiClient, configuration, CurrenciesApi, CurrencyStore, AccountsApi, AccountStore, \
-    CurrencyRead, AccountRead, CategoryRead, CategoriesApi, Category, TagRead, TagsApi, TagModelStore, TransactionRead, \
+    CurrencyRead, AccountRead, CategoryRead, CategoriesApi, CategoryStore, TagRead, TagsApi, TagModelStore, TransactionRead, \
     TransactionsApi, TransactionStore, AccountUpdate
 
 
@@ -94,7 +94,7 @@ class FireflyClient:
 
         return categories
 
-    def create_category(self, category: Category) -> int:
+    def create_category(self, category: CategoryStore) -> int:
         """Create a new category."""
 
         r = CategoriesApi(self.__client).store_category(category, x_trace_id=str(uuid.uuid4()))
