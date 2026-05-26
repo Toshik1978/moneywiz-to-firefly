@@ -78,8 +78,8 @@ EXPORT_CMD=""
 
 if [[ ${IMPORT} = "1" ]]; then
   REPORT_FILE_PATH="$1"
-  sed -i '' '1d' $REPORT_FILE_PATH
-  scp "$REPORT_FILE_PATH" "${SERVER}:${SERVER_PATH}reports/"
+  REPORT_FILE_NAME=$(basename "$REPORT_FILE_PATH")
+  sed '1d' "$REPORT_FILE_PATH" | ssh "${SERVER}" "cat > \"${SERVER_PATH}reports/${REPORT_FILE_NAME}\""
 
   REPORT_FILE_NAME=$(basename ${REPORT_FILE_PATH})
   IMPORT_CMD="uv run --directory ~/Development/moneywiz-to-firefly ~/Development/moneywiz-to-firefly/moneywiz-to-firefly --dedup --dbpath ${SERVER_PATH}db ${SERVER_PATH}reports/${REPORT_FILE_NAME};"
@@ -89,4 +89,4 @@ if [[ ${EXPORT} = "1" ]]; then
 fi
 
 # Run command remotely
-ssh $SERVER -t "${IMPORT_CMD}${EXPORT_CMD}"
+ssh $SERVER -t "export PATH=\"\$HOME/.local/share/mise/shims:\$PATH\";${IMPORT_CMD}${EXPORT_CMD}"
