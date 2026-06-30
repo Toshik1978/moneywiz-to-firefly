@@ -54,8 +54,20 @@ class TransferExporter:
     def __sync_ff(self, db: list[Transfer]) -> None:
         # Create transfer in Firefly
         index = 0
+        skipped = 0
         try:
             for t in db:
+                # Skip transfers touching an account that was never created in Firefly
+                # (e.g. an account marked `ignore` in the config). Otherwise we would send
+                # "None" as a source/destination id and the API would reject it.
+                if not self.__has_firefly_account(t.source_id) or not self.__has_firefly_account(t.target_id):
+                    skipped += 1
+                    self.__logger.warning(
+                        f"Skipping transfer {t.id}: references an account not exported to Firefly "
+                        f"({self.__accounts[t.source_id].name} -> {self.__accounts[t.target_id].name})"
+                    )
+                    continue
+
                 # Create transaction and update database object
                 # It's possible to have split transfers, but we don't care and create them separately!
                 ff_t = self.__to_ff(t)
@@ -67,8 +79,12 @@ class TransferExporter:
                     if index % 100 == 0:
                         self.__logger.info(f"\t...{index} transfers created...")
         finally:
-            self.__logger.info(f"{index} transfers created in total")
+            self.__logger.info(f"{index} transfers created in total ({skipped} skipped)")
             self.__db.add_transfers(db)
+
+    def __has_firefly_account(self, account_id: int) -> bool:
+        account = self.__accounts.get(account_id)
+        return account is not None and account.firefly_id is not None
 
     def __to_ff(self, t: Transfer) -> TransactionStore:
         if self.__accounts[t.target_id].firefly_type == str(ShortAccountTypeProperty.LIABILITY):
@@ -97,9 +113,16 @@ class TransferExporter:
         # It's either withdrawal to liability account or expense (to the bank)
         dst_id = str(self.__accounts[t.target_id].firefly_id)
         category_id = self.__loan_payment_category_id
-        if t.category.name == self.__settings.loan_interest_category:
+        is_interest = t.category is not None and t.category.name == self.__settings.loan_interest_category
+        if is_interest and t.payee_id is not None:
             dst_id = self.__payees[t.payee_id]
             category_id = self.__loan_interest_category_id
+        elif is_interest:
+            # Loan interest is meant to go to a payee (the bank), but this transfer has none.
+            # Keep the record by routing it to the liability account as a loan payment.
+            self.__logger.warning(
+                f"Loan-interest transfer {t.id} has no payee; routing to the liability account as a loan payment"
+            )
 
         return TransactionStore(
             transactions=[

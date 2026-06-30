@@ -86,6 +86,13 @@ The entry point is `cli.py` (`cli:main`, a Click CLI). Three packages, each a la
   and creates a Firefly split transaction when more than one falls in the same bucket.
 - **Liability transfers** (loan payments) are special-cased into withdrawals in
   `firefly/transfer.py`, using `loan_payment_category` / `loan_interest_category` from config.
+  A loan-*interest* transfer routes its destination to the payee (the bank); if it has no
+  payee it falls back to loan-payment routing (destination = the liability account) with a
+  warning rather than crashing.
+- **Ignored / unexported accounts:** an account marked `ignore` in config is never created in
+  Firefly, so its `firefly_id` stays `None`. The payment and transfer exporters **skip** any
+  transaction referencing such an account (with a warning) — otherwise they would send the
+  string `"None"` as a source/destination id and the API would reject it.
 - **Idempotency:** never assume export is fresh. It only sends un-exported rows. Re-running is
   safe by design — preserve that property.
 
