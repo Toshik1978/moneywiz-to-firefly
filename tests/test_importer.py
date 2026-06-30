@@ -41,7 +41,9 @@ class TestRowClassification:
 class TestFailLoud:
     def test_missing_column_raises_instead_of_dropping_rows(self, tmp_path):
         # Header without the Amount column; the payment row can't be parsed.
-        broken_header = "Account,Name,Current balance,Transfers,Payee,Category,Description,Balance,Currency,Date,Time,Tags"
+        broken_header = (
+            "Account,Name,Current balance,Transfers,Payee,Category,Description,Balance,Currency,Date,Time,Tags"
+        )
         path = tmp_path / "broken.csv"
         path.write_text(
             broken_header + "\n,,,,Grocery,Food,Shop,950,USD,15/06/2024,10:30,\n",
@@ -51,7 +53,9 @@ class TestFailLoud:
             CsvImporter(LOG).parse(str(path))
 
     def test_reports_count_of_all_failed_rows(self, tmp_path):
-        broken_header = "Account,Name,Current balance,Transfers,Payee,Category,Description,Balance,Currency,Date,Time,Tags"
+        broken_header = (
+            "Account,Name,Current balance,Transfers,Payee,Category,Description,Balance,Currency,Date,Time,Tags"
+        )
         path = tmp_path / "broken.csv"
         path.write_text(
             broken_header
