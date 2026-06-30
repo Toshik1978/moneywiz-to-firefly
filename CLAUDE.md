@@ -114,5 +114,6 @@ The entry point is `cli.py` (`cli:main`, a Click CLI). Three packages, each a la
 ## Gotchas when editing
 
 - New top-level modules/packages must be added to `only-include` in `pyproject.toml`.
-- `update_firefly.sh` contains hard-coded SSH host/paths — it's a personal helper, not generic.
+- `update_firefly.sh` is configured via `.env` (`DEPLOY_SSH_HOST`, `DEPLOY_REMOTE_PATH`,
+  `DEPLOY_PROJECT_DIR`); it sources `.env` beside the script and errors if they're unset.
 - Investment / brokerage / crypto accounts are known-unsupported; don't assume they work.

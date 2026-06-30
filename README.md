@@ -107,9 +107,21 @@ See [`firefly/config.py`](firefly/config.py) for the full schema.
 
 ### Helper script
 
-[`update_firefly.sh`](update_firefly.sh) is a personal convenience wrapper that ships a CSV to
-a remote server over SSH and runs import + export there. It contains hard-coded host/path
-values and is **not** meant for general use — treat it as an example.
+[`update_firefly.sh`](update_firefly.sh) is a convenience wrapper that ships a CSV to a remote
+host over SSH and runs import + export there. Configure it via environment variables or a
+`.env` file beside the script (see [`.env.dist`](.env.dist)):
+
+| Variable             | Description                                                       |
+| -------------------- | ----------------------------------------------------------------- |
+| `DEPLOY_SSH_HOST`    | SSH host: `user@host` or a `~/.ssh/config` alias                  |
+| `DEPLOY_REMOTE_PATH` | Base dir on the host holding `reports/`, `db/`, and `config.json` |
+| `DEPLOY_PROJECT_DIR` | Path to the `moneywiz-to-firefly` checkout on the host            |
+| `DEPLOY_PATH_PREFIX` | Optional: dir to prepend to the host's `PATH` so `uv` is found (mise shims; empty = leave PATH as-is) |
+
+Paths that should expand on the **host** (e.g. using `$HOME`) must be single-quoted in `.env`
+so they aren't expanded locally — e.g. `DEPLOY_PROJECT_DIR='$HOME/moneywiz-to-firefly'`. The
+host also needs its own Firefly credentials (`FIREFLY_URL` / `FIREFLY_TOKEN`) for the export
+step.
 
 ## Known limitations & gotchas
 
