@@ -19,7 +19,7 @@ dependencies = [
 moneywiz-to-firefly = "cli:main"
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.15"]
+dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.15"]
 
 [build-system]
 requires = ["hatchling"]
@@ -33,6 +33,10 @@ only-include = ["cli.py", "helpers.py", "firefly", "moneywiz", "storage"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.coverage.run]
+source = ["cli", "helpers", "firefly", "moneywiz", "storage"]
+omit = ["tests/*"]
 
 [tool.ruff]
 line-length = 120

@@ -37,10 +37,14 @@ uv run moneywiz-to-firefly -v ...
 uv run ruff check .          # lint
 uv run ruff format .         # format (config: line-length 120, rules E/F/I/UP/B)
 uv run pytest                # tests (tests/, pure logic: helpers, transfer linker, importer)
+uv run pytest --cov          # tests + coverage (config in [tool.coverage.run])
 ```
 
-CI (`.github/workflows/ci.yml`) runs `ruff check`, `ruff format --check`, and `pytest` on
-push to `main` and on PRs.
+CI (`.github/workflows/ci.yml`) runs `ruff check`, `ruff format --check`, and `pytest --cov`
+on push to `main` and on PRs. There is no coverage gate (it's informational). On push to
+`main` it publishes Tests/Coverage badges by updating a gist — requires repo secrets
+`GIST_ID` (the gist) and `GIST_SECRET_TOKEN` (a PAT with `gist` scope). The README badge URLs
+embed the gist id; replace the `<GIST_ID>` placeholder once the gist exists.
 
 ## Architecture
 

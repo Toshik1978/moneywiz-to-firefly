@@ -1,3 +1,7 @@
+[![CI](https://github.com/Toshik1978/moneywiz-to-firefly/actions/workflows/ci.yml/badge.svg)](https://github.com/Toshik1978/moneywiz-to-firefly/actions)
+![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Toshik1978/<GIST_ID>/raw/tests.json&maxAge=180)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Toshik1978/<GIST_ID>/raw/coverage.json&maxAge=180)
+
 # MoneyWiz → Firefly III migration
 
 A command-line tool that migrates your full [MoneyWiz](https://www.wiz.money/) transaction
