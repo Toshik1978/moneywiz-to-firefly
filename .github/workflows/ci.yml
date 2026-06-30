@@ -72,7 +72,7 @@ jobs:
       - name: Update badges gist
         # Only on push to main (PRs from forks have no access to the secret).
         if: github.ref == 'refs/heads/main'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           GIST_ID: ${{ secrets.GIST_ID }}
           TEST_BADGE_MSG: ${{ env.TEST_BADGE_MSG }}
