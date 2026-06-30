@@ -31,7 +31,21 @@ uv run moneywiz-to-firefly -v ...
 `FIREFLY_URL` / `FIREFLY_TOKEN` can come from env vars or a `.env` file (Click
 `auto_envvar_prefix='FIREFLY'`).
 
-There is **no test suite, linter config, or CI** in this repo.
+### Quality checks
+
+```bash
+uv run ruff check .          # lint
+uv run ruff format .         # format (config: line-length 120, rules E/F/I/UP/B)
+uv run pytest                # tests (tests/, pure logic: helpers, transfer linker, importer)
+```
+
+CI (`.github/workflows/ci.yml`) runs `ruff check`, `ruff format --check`, and `pytest` on
+push to `main` and on PRs.
+
+Note: `tests/test_analyzer_fresh_db.py` has a **strict xfail** documenting a known bug — a
+first import into an empty DB fails because a new currency has no `id` yet when accounts are
+validated. If you fix that, the xfail will start failing (strict) and the marker should be
+removed.
 
 ## Architecture
 
