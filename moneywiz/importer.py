@@ -1,4 +1,5 @@
 import csv
+import itertools
 from logging import Logger
 
 from helpers import filter_utf8, hash_key
@@ -35,9 +36,17 @@ class CsvImporter:
 
         self.__logger.info(f"Parsing {filename}...")
         with open(filename, encoding="utf-8-sig") as csvfile:
-            reader = csv.DictReader(csvfile)
-            # The first CSV row is row 2 (row 1 is the header).
-            for line, row in enumerate(reader, start=2):
+            first = csvfile.readline()
+            if first.lower().startswith("sep="):
+                # Raw MoneyWiz exports prepend an Excel "sep=,"hint line; the header is next.
+                reader = csv.DictReader(csvfile)
+                header_line = 2
+            else:
+                # Already-stripped file: the line we just read is the header. Feed it back.
+                reader = csv.DictReader(itertools.chain([first], csvfile))
+                header_line = 1
+            # Data rows start on the line after the header.
+            for line, row in enumerate(reader, start=header_line + 1):
                 self.__parse(line, row)
         if self.__failed:
             raise ImporterException(

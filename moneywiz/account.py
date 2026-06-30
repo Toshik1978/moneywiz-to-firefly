@@ -29,10 +29,12 @@ class AccountAnalyzer:
         for a in accounts:
             if a.name in mapping:
                 mapping[a.name].balance = a.balance
-        # Add new accounts
+        # Add new accounts. Link the currency via the relationship (not currency_id):
+        # a freshly parsed currency has no id yet, so SQLAlchemy must resolve the FK on
+        # commit. This mirrors how transfers and payments link their relations.
         self.__accounts.extend(
             [
-                Account(name=a.name, currency_id=self.__currencies.get(a.currency).id, balance=a.balance)
+                Account(name=a.name, currency=self.__currencies.get(a.currency), balance=a.balance)
                 for a in accounts
                 if a.name not in mapping
             ]
@@ -48,6 +50,6 @@ class AccountAnalyzer:
         return self.__accounts
 
     def __validate(self) -> None:
-        accounts = [account.name for account in self.__accounts if account.currency_id is None]
+        accounts = [account.name for account in self.__accounts if account.currency is None]
         if accounts:
             raise AnalyzerException(f"Orphaned accounts detected: {accounts}")
