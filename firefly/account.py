@@ -1,3 +1,4 @@
+from calendar import monthrange
 from datetime import datetime
 from logging import Logger
 from typing import List, Mapping
@@ -112,4 +113,8 @@ class AccountExporter:
         return ff
 
     def __to_date(self, date: int) -> datetime:
-        return datetime.now().replace(day=date)
+        now = datetime.now()
+        # Clamp the configured payment day to a valid day for the current month
+        # (e.g. day 31 in a 30-day month would otherwise raise ValueError).
+        last_day = monthrange(now.year, now.month)[1]
+        return now.replace(day=min(date, last_day))

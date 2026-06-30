@@ -70,7 +70,7 @@ class PaymentExporter:
         for p in db:
             payee = p.payee.name if p.payee else uuid.uuid4().hex # Unique Payee name in case it can't be split
             withdrawal = p.amount[0] == '-'
-            tt=TransactionTypeProperty.WITHDRAWAL if withdrawal else TransactionTypeProperty.DEPOSIT,
+            tt = TransactionTypeProperty.WITHDRAWAL if withdrawal else TransactionTypeProperty.DEPOSIT
             key = hash_key(str(p.account.name), payee, str(tt), p.date.strftime('%d-%m-%Y-%H-%M'))
             if mapping.get(key) is None:
                 mapping[key] = []

@@ -2,6 +2,7 @@ import csv
 from logging import Logger
 
 from helpers import hash_key, filter_utf8
+from moneywiz.exception import ImporterException
 from moneywiz.scheme import MwAccount, MwCurrency, MwTransfer, MwPayment, MwData, MwPayee, MwCategory, MwTag
 
 
@@ -16,6 +17,7 @@ class CsvImporter:
     __accounts: dict[str, MwAccount]
     __transfers: list[MwTransfer]
     __payments: list[MwPayment]
+    __failed: int
 
     def __init__(self, logger: Logger):
         self.__logger = logger
@@ -26,6 +28,7 @@ class CsvImporter:
         self.__accounts = {}
         self.__transfers = []
         self.__payments = []
+        self.__failed = 0
 
     def parse(self, filename: str) -> MwData:
         """Parse CSV file."""
@@ -33,8 +36,14 @@ class CsvImporter:
         self.__logger.info(f'Parsing {filename}...')
         with open(filename, encoding='utf-8-sig') as csvfile:
             reader = csv.DictReader(csvfile)
-            for row in reader:
-                self.__parse(row)
+            # The first CSV row is row 2 (row 1 is the header).
+            for line, row in enumerate(reader, start=2):
+                self.__parse(line, row)
+        if self.__failed:
+            raise ImporterException(
+                f'Failed to parse {self.__failed} row(s) from {filename}. '
+                f'This usually means the CSV is missing expected columns. '
+                f'See the errors above for the offending rows.')
         self.__logger.info(f'Parsing {filename}... Done')
 
         return MwData(
@@ -47,7 +56,7 @@ class CsvImporter:
             payments=self.__payments,
         )
 
-    def __parse(self, row: dict) -> None:
+    def __parse(self, line: int, row: dict) -> None:
         try:
             if row['Name']:
                 self.__parse_account(row)
@@ -55,9 +64,9 @@ class CsvImporter:
                 self.__parse_transfer(row)
             else:
                 self.__parse_payment(row)
-        except KeyError:
-            self.__logger.error(f'Parsing failed: {row}')
-            pass
+        except KeyError as e:
+            self.__failed += 1
+            self.__logger.error(f'Parsing failed at row {line} (missing column {e}): {row}')
 
     def __parse_account(self, row: dict) -> None:
         self.__logger.debug(f'Parsing account and currency: {row["Name"]}')
