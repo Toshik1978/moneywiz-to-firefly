@@ -13,19 +13,19 @@ from storage.transactions import TransactionsDB
 
 
 @click.command()
-@click.option('--dbpath', default='.db', type=click.Path(exists=False), help='DB directory')
-@click.option('--dedup', is_flag=True, default=False, help='Deduplicate payments')
-@click.option('--url', help='Firefly III URL')
-@click.option('--token', help='Firefly III token')
-@click.option('--export/--import', is_flag=True, default=False, help='Export or import mode')
-@click.option('--config', type=click.Path(exists=True), help='Configuration file for export')
-@click.option('-v', is_flag=True, default=False, help='Verbose logging')
-@click.argument('filename', type=click.Path(exists=True), required=False)
+@click.option("--dbpath", default=".db", type=click.Path(exists=False), help="DB directory")
+@click.option("--dedup", is_flag=True, default=False, help="Deduplicate payments")
+@click.option("--url", help="Firefly III URL")
+@click.option("--token", help="Firefly III token")
+@click.option("--export/--import", is_flag=True, default=False, help="Export or import mode")
+@click.option("--config", type=click.Path(exists=True), help="Configuration file for export")
+@click.option("-v", is_flag=True, default=False, help="Verbose logging")
+@click.argument("filename", type=click.Path(exists=True), required=False)
 def cli(dbpath, dedup, url, token, export, config, v, filename):
     logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG if v else logging.WARN)
     logging.getLogger("firefly_iii_client").setLevel(logging.DEBUG if v else logging.WARN)
     logging.getLogger("urllib3").setLevel(logging.DEBUG if v else logging.WARN)
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG if v else logging.INFO)
+    logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG if v else logging.INFO)
     logger = logging.getLogger(__name__)
 
     db = TransactionsDB(logger, dbpath).init()
@@ -42,7 +42,7 @@ def cli(dbpath, dedup, url, token, export, config, v, filename):
             analyzer.analyze(data, dedup)
             analyzer.commit()
         except Exception as e:
-            logger.error(f'Failed to import CSV file: {e}', exc_info=True)
+            logger.error(f"Failed to import CSV file: {e}", exc_info=True)
             sys.exit(1)
 
     else:
@@ -56,7 +56,7 @@ def cli(dbpath, dedup, url, token, export, config, v, filename):
         try:
             exporter.export()
         except Exception as e:
-            logger.error(f'Failed to export to Firefly III: {e}', exc_info=True)
+            logger.error(f"Failed to export to Firefly III: {e}", exc_info=True)
             sys.exit(2)
 
 
@@ -64,8 +64,8 @@ def main() -> None:
     """Console-script entry point."""
 
     load_dotenv()
-    cli(auto_envvar_prefix='FIREFLY')
+    cli(auto_envvar_prefix="FIREFLY")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

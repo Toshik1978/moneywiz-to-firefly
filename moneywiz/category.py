@@ -18,10 +18,10 @@ class CategoryAnalyzer:
     def analyze(self, categories: list[MwCategory]) -> Self:
         """Analyze category data."""
 
-        self.__logger.info('Analyzing categories...')
+        self.__logger.info("Analyzing categories...")
         hashset = {c.name for c in self.__categories}
         self.__categories.extend([Category(name=c.name) for c in categories if c.name and c.name not in hashset])
-        self.__logger.info('Analyzing categories... Done')
+        self.__logger.info("Analyzing categories... Done")
         return self
 
     def get(self) -> list[Category]:

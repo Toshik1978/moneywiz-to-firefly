@@ -22,13 +22,13 @@ class CategoryExporter:
     def sync(self) -> None:
         """Synchronize the categories in the database and Firefly III."""
 
-        self.__logger.info('Sync categories...')
+        self.__logger.info("Sync categories...")
         db = self.__db.get_categories()
         ff = self.__client.get_categories()
 
         self.__sync_db(db, ff)
         self.__sync_ff(db, ff)
-        self.__logger.info('Sync categories... Done')
+        self.__logger.info("Sync categories... Done")
 
     def __sync_db(self, db: list[Category], ff: list[CategoryRead]) -> None:
         # Update firefly_id for all categories exist in Firefly
@@ -37,7 +37,7 @@ class CategoryExporter:
             ff_c = mapping.get(c.name)
             if ff_c and c.firefly_id is None:
                 c.firefly_id = int(ff_c.id)
-                self.__logger.debug(f'Category {c.name} updated in database. Id={c.firefly_id}')
+                self.__logger.debug(f"Category {c.name} updated in database. Id={c.firefly_id}")
         self.__db.add_categories(db)
 
     def __sync_ff(self, db: list[Category], ff: list[CategoryRead]) -> None:
@@ -49,6 +49,6 @@ class CategoryExporter:
                 if ff_c is None:
                     # Create category and update database object
                     c.firefly_id = self.__client.create_category(CategoryStore(name=c.name))
-                    self.__logger.debug(f'Category {c.name} created. Id={c.firefly_id}')
+                    self.__logger.debug(f"Category {c.name} created. Id={c.firefly_id}")
         finally:
             self.__db.add_categories(db)

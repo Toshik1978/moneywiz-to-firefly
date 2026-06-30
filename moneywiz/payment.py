@@ -18,7 +18,9 @@ class PaymentAnalyzer:
     __accounts: Mapping[str, Account]
     __payments: list[Payment]
 
-    def __init__(self, logger: Logger, payees: list[Payee], categories: list[Category], tags: list[Tag], accounts: list[Account]) -> None:
+    def __init__(
+        self, logger: Logger, payees: list[Payee], categories: list[Category], tags: list[Tag], accounts: list[Account]
+    ) -> None:
         self.__logger = logger
         self.__payees = {hash_key(payee.name, str(payee.expense)): payee for payee in payees}
         self.__categories = {category.name: category for category in categories}
@@ -29,11 +31,11 @@ class PaymentAnalyzer:
     def analyze(self, payments: list[MwPayment]) -> Self:
         """Analyze payment data."""
 
-        self.__logger.info('Analyzing payments...')
+        self.__logger.info("Analyzing payments...")
         self.__payments = [
             Payment(
                 account=self.__accounts.get(p.account),
-                payee=self.__payees.get(hash_key(p.payee, str(p.amount[0] == '-'))),
+                payee=self.__payees.get(hash_key(p.payee, str(p.amount[0] == "-"))),
                 category=self.__categories.get(p.category),
                 description=p.description,
                 tag=self.__tags.get(p.tag),
@@ -44,7 +46,7 @@ class PaymentAnalyzer:
             for p in payments
         ]
         self.__validate()
-        self.__logger.info('Analyzing payments... Done')
+        self.__logger.info("Analyzing payments... Done")
         return self
 
     def get(self) -> list[Payment]:
@@ -55,4 +57,4 @@ class PaymentAnalyzer:
     def __validate(self) -> None:
         payments = [payment.description for payment in self.__payments if payment.account is None]
         if payments:
-            raise AnalyzerException(f'Orphaned payments detected: {payments}')
+            raise AnalyzerException(f"Orphaned payments detected: {payments}")

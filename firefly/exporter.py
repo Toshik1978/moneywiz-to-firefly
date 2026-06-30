@@ -37,7 +37,7 @@ class Exporter:
     def export(self) -> None:
         """Run export."""
 
-        self.__logger.info('Export financial data to Firefly III...')
+        self.__logger.info("Export financial data to Firefly III...")
         CurrencyExporter(self.__logger, self.__db, self.__client).sync()
         CategoryExporter(self.__logger, self.__db, self.__client).sync()
         TagExporter(self.__logger, self.__db, self.__client).sync()
@@ -45,4 +45,4 @@ class Exporter:
         AccountExporter(self.__logger, self.__db, self.__client, self.__config).sync()
         PaymentExporter(self.__logger, self.__db, self.__client).sync()
         TransferExporter(self.__logger, self.__db, self.__client, self.__config).sync()
-        self.__logger.info('Export financial data to Firefly III... Done')
+        self.__logger.info("Export financial data to Firefly III... Done")

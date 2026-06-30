@@ -33,30 +33,37 @@ class CsvAnalyzer:
     def analyze(self, mw: MwData, dedup: bool) -> None:
         """Run data analysis."""
 
-        self.__logger.info('Analyzing MoneyWiz CSV...')
+        self.__logger.info("Analyzing MoneyWiz CSV...")
 
         self.__currencies = CurrencyAnalyzer(self.__logger, self.__db.get_currencies()).analyze(mw.currencies).get()
         self.__payees = PayeeAnalyzer(self.__logger, self.__db.get_payees()).analyze(mw.payees).get()
         self.__categories = CategoryAnalyzer(self.__logger, self.__db.get_categories()).analyze(mw.categories).get()
         self.__tags = TagAnalyzer(self.__logger, self.__db.get_tags()).analyze(mw.tags).get()
-        self.__accounts = AccountAnalyzer(self.__logger, self.__currencies, self.__db.get_accounts()).analyze(
-            mw.accounts).get()
+        self.__accounts = (
+            AccountAnalyzer(self.__logger, self.__currencies, self.__db.get_accounts()).analyze(mw.accounts).get()
+        )
 
-        self.__transfers = TransferAnalyzer(self.__logger, self.__currencies, self.__payees, self.__categories,
-                                            self.__accounts).analyze(mw.transfers).get()
-        self.__payments = PaymentAnalyzer(self.__logger, self.__payees, self.__categories, self.__tags,
-                                          self.__accounts).analyze(mw.payments).get()
+        self.__transfers = (
+            TransferAnalyzer(self.__logger, self.__currencies, self.__payees, self.__categories, self.__accounts)
+            .analyze(mw.transfers)
+            .get()
+        )
+        self.__payments = (
+            PaymentAnalyzer(self.__logger, self.__payees, self.__categories, self.__tags, self.__accounts)
+            .analyze(mw.payments)
+            .get()
+        )
 
         if dedup:
             self.__deduplicate_transfers()
             self.__deduplicate_payments()
 
-        self.__logger.info('Analyzing MoneyWiz CSV... Done')
+        self.__logger.info("Analyzing MoneyWiz CSV... Done")
 
     def commit(self) -> None:
         """Commit changes."""
 
-        self.__logger.info('Committing changes')
+        self.__logger.info("Committing changes")
         self.__db.add_currencies(self.__currencies)
         self.__db.add_payees(self.__payees)
         self.__db.add_categories(self.__categories)
@@ -64,32 +71,36 @@ class CsvAnalyzer:
         self.__db.add_accounts(self.__accounts)
         self.__db.add_transfers(self.__transfers)
         self.__db.add_payments(self.__payments)
-        self.__logger.info('Committed changes')
+        self.__logger.info("Committed changes")
 
     def __deduplicate_transfers(self) -> None:
         """Deduplicate transfers."""
 
         count = len(self.__transfers)
+
         # Check if we have transfers in DB already and remove them
         def is_duplicate(t: Transfer) -> bool:
             dup = self.__db.find_transfer(t)
             if dup is not None:
-                self.__logger.info(f'Duplicate transfer {t.description} found. Id={dup.firefly_id}')
+                self.__logger.info(f"Duplicate transfer {t.description} found. Id={dup.firefly_id}")
                 return True
             return False
+
         self.__transfers[:] = filterfalse(is_duplicate, self.__transfers)
-        self.__logger.info(f'Removed {count - len(self.__transfers)} from {count} duplicate transfers')
+        self.__logger.info(f"Removed {count - len(self.__transfers)} from {count} duplicate transfers")
 
     def __deduplicate_payments(self) -> None:
         """Deduplicate payments."""
 
         count = len(self.__payments)
+
         # Check if we have payments in DB already and remove them
         def is_duplicate(p: Payment) -> bool:
             dup = self.__db.find_payment(p)
             if dup is not None:
-                self.__logger.info(f'Duplicate payment {p.description} found. Id={dup.firefly_id}')
+                self.__logger.info(f"Duplicate payment {p.description} found. Id={dup.firefly_id}")
                 return True
             return False
+
         self.__payments[:] = filterfalse(is_duplicate, self.__payments)
-        self.__logger.info(f'Removed {count - len(self.__payments)} from {count} duplicate payments')
+        self.__logger.info(f"Removed {count - len(self.__payments)} from {count} duplicate payments")

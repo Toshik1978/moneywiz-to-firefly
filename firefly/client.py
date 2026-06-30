@@ -31,12 +31,9 @@ class FireflyClient:
     def __init__(self, logger: Logger, url: str, token: str) -> None:
         self.__logger = logger
         self.__client = ApiClient(
-            configuration.Configuration(
-                host=url,
-                access_token=token
-            ),
-            header_name='Content-Type',
-            header_value='application/json'
+            configuration.Configuration(host=url, access_token=token),
+            header_name="Content-Type",
+            header_value="application/json",
         )
 
     def get_currencies(self) -> list[CurrencyRead]:

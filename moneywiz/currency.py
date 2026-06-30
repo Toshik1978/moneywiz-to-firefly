@@ -18,10 +18,10 @@ class CurrencyAnalyzer:
     def analyze(self, currencies: list[MwCurrency]) -> Self:
         """Analyze currency data."""
 
-        self.__logger.info('Analyzing currencies...')
+        self.__logger.info("Analyzing currencies...")
         hashset = {c.name for c in self.__currencies}
         self.__currencies.extend([Currency(name=c.name) for c in currencies if c.name not in hashset])
-        self.__logger.info('Analyzing currencies... Done')
+        self.__logger.info("Analyzing currencies... Done")
         return self
 
     def get(self) -> list[Currency]:

@@ -22,16 +22,16 @@ class AccountConfig:
     payment_date: int | None = None
     """Credit card payment date."""
 
-    liability_type: str | None = ''
+    liability_type: str | None = ""
     """Account liability type."""
 
-    interest: str | None = ''
+    interest: str | None = ""
     """Account interest rate."""
 
-    opening_balance_date: str | None = ''
+    opening_balance_date: str | None = ""
     """Account opening balance date."""
 
-    opening_balance: str | None = ''
+    opening_balance: str | None = ""
     """Account opening balance."""
 
     active: bool | None = False
@@ -75,11 +75,12 @@ def load_config(logger: Logger, filename: str) -> Config:
     """Load configuration from file."""
 
     if not filename:
-        return Config(accounts=[],
-                      settings=SettingsConfig(default_account_type="asset", default_account_role="defaultAsset"))
+        return Config(
+            accounts=[], settings=SettingsConfig(default_account_type="asset", default_account_role="defaultAsset")
+        )
 
-    logger.info(f'Load configuration {filename}')
+    logger.info(f"Load configuration {filename}")
     json = Path(filename).read_text()
     cfg = Config.from_json(json)
-    logger.info('Configuration loaded')
+    logger.info("Configuration loaded")
     return cfg

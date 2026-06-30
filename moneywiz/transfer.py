@@ -18,7 +18,14 @@ class TransferAnalyzer:
     __accounts: Mapping[str, Account]
     __transfers: list[Transfer]
 
-    def __init__(self, logger: Logger, currencies: list[Currency], payees: list[Payee], categories: list[Category], accounts: list[Account]) -> None:
+    def __init__(
+        self,
+        logger: Logger,
+        currencies: list[Currency],
+        payees: list[Payee],
+        categories: list[Category],
+        accounts: list[Account],
+    ) -> None:
         self.__logger = logger
         self.__currencies = {currency.name: currency for currency in currencies}
         self.__payees = {hash_key(payee.name, str(payee.expense)): payee for payee in payees}
@@ -29,7 +36,7 @@ class TransferAnalyzer:
     def analyze(self, transfers: list[MwTransfer]) -> Self:
         """Analyze transfer data."""
 
-        self.__logger.info('Analyzing transfers...')
+        self.__logger.info("Analyzing transfers...")
 
         # Try to link trivial transfers first
         unlinked = self.__link(transfers)
@@ -37,13 +44,13 @@ class TransferAnalyzer:
         unlinked = self.__link_complex(unlinked)
         if unlinked:
             raise AnalyzerException(
-                f'Orphaned transfers detected: {[hash_key(t.source, t.target, t.date, t.time) for t in unlinked]}')
+                f"Orphaned transfers detected: {[hash_key(t.source, t.target, t.date, t.time) for t in unlinked]}"
+            )
         if len(transfers) != len(self.__transfers) * 2:
-            raise AnalyzerException(
-                f'Missing transfers detected: {len(transfers)} vs {len(self.__transfers) * 2}')
+            raise AnalyzerException(f"Missing transfers detected: {len(transfers)} vs {len(self.__transfers) * 2}")
         self.__validate()
 
-        self.__logger.info('Analyzing transfers... Done')
+        self.__logger.info("Analyzing transfers... Done")
         return self
 
     def __link(self, transfers: list[MwTransfer]) -> list[MwTransfer]:
@@ -81,7 +88,7 @@ class TransferAnalyzer:
         """Try to link complex transfers within the same month and return still unlinked list."""
 
         def hash_func(t: MwTransfer, pair: bool) -> str:
-            date = '00' + t.date[2:]
+            date = "00" + t.date[2:]
             if pair:
                 return hash_key(t.target, t.source, date)
             else:
@@ -96,7 +103,7 @@ class TransferAnalyzer:
         for t in transfers:
             key = hash_func(t, False)
             if key in mapping:
-                self.__logger.error(f'Mapping collision: {key}')
+                self.__logger.error(f"Mapping collision: {key}")
                 continue
             mapping[key] = t
 
@@ -108,7 +115,7 @@ class TransferAnalyzer:
             key2 = hash_func(transfer, True)
             if key1 not in excluded:
                 if key2 in excluded:
-                    raise AnalyzerException(f'Wrong transfers symmetry: {key1} / {key2}')
+                    raise AnalyzerException(f"Wrong transfers symmetry: {key1} / {key2}")
 
                 excluded.add(key1)
                 excluded.add(key2)
@@ -124,7 +131,7 @@ class TransferAnalyzer:
         return unlinked
 
     def __xfer(self, orig: MwTransfer, pair: MwTransfer) -> Transfer:
-        if orig.amount[0] != '-':
+        if orig.amount[0] != "-":
             # Negative means we transfer from orig to pair
             orig, pair = pair, orig
 
@@ -133,7 +140,7 @@ class TransferAnalyzer:
             target=self.__accounts.get(orig.target),
             payee=self.__payees.get(hash_key(orig.payee, str(True))),
             category=self.__categories.get(orig.category),
-            description=f'{orig.source} -> {orig.target}',
+            description=f"{orig.source} -> {orig.target}",
             date=to_datetime(orig.date, orig.time),
             source_amount=orig.amount,
             source_currency=self.__currencies.get(orig.currency),
@@ -150,7 +157,10 @@ class TransferAnalyzer:
 
     def __validate(self) -> None:
         # We can check if numbers are equal for the same currencies on both sides.
-        transfers = [t for t in self.__transfers if
-                     t.source_currency == t.target_currency and t.source_amount != '-' + t.target_amount]
+        transfers = [
+            t
+            for t in self.__transfers
+            if t.source_currency == t.target_currency and t.source_amount != "-" + t.target_amount
+        ]
         if transfers:
-            raise AnalyzerException(f'Orphaned transfers detected: {transfers}')
+            raise AnalyzerException(f"Orphaned transfers detected: {transfers}")

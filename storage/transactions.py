@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from storage.scheme import Account, Base, Category, Currency, Payee, Payment, Tag, Transfer
 
-DB_NAME = 'MoneyWiz.sqlite'
+DB_NAME = "MoneyWiz.sqlite"
 
 
 @event.listens_for(Engine, "connect")
@@ -31,12 +31,12 @@ class TransactionsDB:
     def init(self) -> Self:
         """Initialize database scheme."""
 
-        self.__logger.info('Initializing database')
+        self.__logger.info("Initializing database")
         p = Path(self.__path)
         p.mkdir(parents=True, exist_ok=True)
-        self.__engine = create_engine(f'sqlite:///{p.joinpath(DB_NAME)}')
+        self.__engine = create_engine(f"sqlite:///{p.joinpath(DB_NAME)}")
         Base.metadata.create_all(self.__engine)
-        self.__logger.info('Initialization finished')
+        self.__logger.info("Initialization finished")
         return self
 
     def get_currencies(self) -> list[Currency]:
@@ -81,7 +81,7 @@ class TransactionsDB:
         with Session(self.__engine) as session:
             return [c for c in session.scalars(select(Payment).filter(Payment.firefly_id.is_(None))).all()]
 
-    def find_transfer(self, t: Transfer) -> Transfer|None:
+    def find_transfer(self, t: Transfer) -> Transfer | None:
         """Check if transfer exists in DB."""
 
         source_id = None if t.source is None else t.source.id
@@ -106,7 +106,7 @@ class TransactionsDB:
                 .where(Transfer.target_currency_id == target_currency_id)
             ).first()
 
-    def find_payment(self, p: Payment) -> Payment|None:
+    def find_payment(self, p: Payment) -> Payment | None:
         """Check if payment exists in DB."""
 
         account_id = None if p.account is None else p.account.id

@@ -28,12 +28,12 @@ class PaymentExporter:
     def sync(self) -> None:
         """Synchronize the payments in the database and Firefly III."""
 
-        self.__logger.info('Sync payments...')
+        self.__logger.info("Sync payments...")
         self.__accounts = {a.id: str(a.firefly_id) for a in self.__db.get_accounts()}
         self.__categories = {c.id: str(c.firefly_id) for c in self.__db.get_categories()}
         self.__payees = {p.id: str(p.firefly_id) for p in self.__db.get_payees()}
         self.__sync_ff(self.__db.get_payments())
-        self.__logger.info('Sync payments... Done')
+        self.__logger.info("Sync payments... Done")
 
     def __sync_ff(self, db: list[Payment]) -> None:
         # Create payments in Firefly
@@ -47,38 +47,38 @@ class PaymentExporter:
                 t = TransactionStore(transactions=[])
                 for p in group:
                     ff_p = self.__to_ff(p)
-                    if ff_p.amount != '0.00':
+                    if ff_p.amount != "0.00":
                         t.transactions.append(ff_p)
 
                 if t.transactions:
                     if len(t.transactions) > 1:
                         t.group_title = group[0].payee.name
                     firefly_id = self.__client.create_transaction(t)
-                    self.__logger.debug(f'Payment created. Id={firefly_id}')
+                    self.__logger.debug(f"Payment created. Id={firefly_id}")
                     for p in group:
                         p.firefly_id = firefly_id
 
                     index += len(t.transactions)
                     if index % 100 == 0:
-                        self.__logger.info(f'\t...{index} payments created...')
+                        self.__logger.info(f"\t...{index} payments created...")
         finally:
-            self.__logger.info(f'{index} payments created in total')
+            self.__logger.info(f"{index} payments created in total")
             self.__db.add_payments(db)
 
     def __to_dict(self, db: list[Payment]) -> Mapping[str, list[Payment]]:
         mapping = {}
         for p in db:
-            payee = p.payee.name if p.payee else uuid.uuid4().hex # Unique Payee name in case it can't be split
-            withdrawal = p.amount[0] == '-'
+            payee = p.payee.name if p.payee else uuid.uuid4().hex  # Unique Payee name in case it can't be split
+            withdrawal = p.amount[0] == "-"
             tt = TransactionTypeProperty.WITHDRAWAL if withdrawal else TransactionTypeProperty.DEPOSIT
-            key = hash_key(str(p.account.name), payee, str(tt), p.date.strftime('%d-%m-%Y-%H-%M'))
+            key = hash_key(str(p.account.name), payee, str(tt), p.date.strftime("%d-%m-%Y-%H-%M"))
             if mapping.get(key) is None:
                 mapping[key] = []
             mapping[key].append(p)
         return mapping
 
     def __to_ff(self, p: Payment) -> TransactionSplitStore:
-        withdrawal = p.amount[0] == '-'
+        withdrawal = p.amount[0] == "-"
         account_id = self.__accounts[p.account_id]
         payee_id = self.__payees[p.payee_id] if p.payee_id else None
         return TransactionSplitStore(
@@ -89,6 +89,6 @@ class PaymentExporter:
             destination_id=payee_id if withdrawal else account_id,
             category_id=self.__categories[p.category_id] if p.category_id else None,
             tags=[p.tag.name] if p.tag else None,
-            description=p.description if p.description else 'No description',
+            description=p.description if p.description else "No description",
             external_id=str(p.id),
         )

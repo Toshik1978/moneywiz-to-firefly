@@ -22,13 +22,13 @@ class TagExporter:
     def sync(self) -> None:
         """Synchronize the tags in the database and Firefly III."""
 
-        self.__logger.info('Sync tags...')
+        self.__logger.info("Sync tags...")
         db = self.__db.get_tags()
         ff = self.__client.get_tags()
 
         self.__sync_db(db, ff)
         self.__sync_ff(db, ff)
-        self.__logger.info('Sync tags... Done')
+        self.__logger.info("Sync tags... Done")
 
     def __sync_db(self, db: list[Tag], ff: list[TagRead]) -> None:
         # Update firefly_id for all tags exist in Firefly
@@ -37,7 +37,7 @@ class TagExporter:
             ff_t = mapping.get(t.name)
             if ff_t and t.firefly_id is None:
                 t.firefly_id = int(ff_t.id)
-                self.__logger.debug(f'Tag {t.name} updated in database. Id={t.firefly_id}')
+                self.__logger.debug(f"Tag {t.name} updated in database. Id={t.firefly_id}")
         self.__db.add_tags(db)
 
     def __sync_ff(self, db: list[Tag], ff: list[TagRead]) -> None:
@@ -49,6 +49,6 @@ class TagExporter:
                 if ff_t is None:
                     # Create tag and update database object
                     t.firefly_id = self.__client.create_tag(TagModelStore(tag=t.name))
-                    self.__logger.debug(f'Tag {t.name} created. Id={t.firefly_id}')
+                    self.__logger.debug(f"Tag {t.name} created. Id={t.firefly_id}")
         finally:
             self.__db.add_tags(db)
