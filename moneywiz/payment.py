@@ -1,10 +1,11 @@
+from collections.abc import Mapping
 from logging import Logger
-from typing import List, Mapping, Self
+from typing import Self
 
+from helpers import hash_key, to_datetime
 from moneywiz.exception import AnalyzerException
-from helpers import to_datetime, hash_key
 from moneywiz.scheme import MwPayment
-from storage.scheme import Payee, Category, Tag, Account, Payment
+from storage.scheme import Account, Category, Payee, Payment, Tag
 
 
 class PaymentAnalyzer:
@@ -15,9 +16,9 @@ class PaymentAnalyzer:
     __categories: Mapping[str, Category]
     __tags: Mapping[str, Tag]
     __accounts: Mapping[str, Account]
-    __payments: List[Payment]
+    __payments: list[Payment]
 
-    def __init__(self, logger: Logger, payees: List[Payee], categories: List[Category], tags: List[Tag], accounts: List[Account]) -> None:
+    def __init__(self, logger: Logger, payees: list[Payee], categories: list[Category], tags: list[Tag], accounts: list[Account]) -> None:
         self.__logger = logger
         self.__payees = {hash_key(payee.name, str(payee.expense)): payee for payee in payees}
         self.__categories = {category.name: category for category in categories}
@@ -25,7 +26,7 @@ class PaymentAnalyzer:
         self.__accounts = {account.name: account for account in accounts}
         self.__payments = []
 
-    def analyze(self, payments: List[MwPayment]) -> Self:
+    def analyze(self, payments: list[MwPayment]) -> Self:
         """Analyze payment data."""
 
         self.__logger.info('Analyzing payments...')
@@ -46,7 +47,7 @@ class PaymentAnalyzer:
         self.__logger.info('Analyzing payments... Done')
         return self
 
-    def get(self) -> List[Payment]:
+    def get(self) -> list[Payment]:
         """Get payment data."""
 
         return self.__payments

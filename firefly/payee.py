@@ -1,5 +1,4 @@
 from logging import Logger
-from typing import List
 
 from firefly_iii_client import AccountRead, AccountStore, ShortAccountTypeProperty
 
@@ -32,7 +31,7 @@ class PayeeExporter:
         self.__sync_ff(db, ff)
         self.__logger.info('Sync payees... Done')
 
-    def __sync_db(self, db: List[Payee], ff: List[AccountRead]) -> None:
+    def __sync_db(self, db: list[Payee], ff: list[AccountRead]) -> None:
         # Update firefly_id for all payees exist in Firefly
         mapping = {hash_key(str(p.attributes.name), str(p.attributes.type)): p for p in ff}
         for p in db:
@@ -43,7 +42,7 @@ class PayeeExporter:
                 self.__logger.debug(f'Payee {p.name} updated in database. Id={p.firefly_id}')
         self.__db.add_payees(db)
 
-    def __sync_ff(self, db: List[Payee], ff: List[AccountRead]) -> None:
+    def __sync_ff(self, db: list[Payee], ff: list[AccountRead]) -> None:
         # Create payee in Firefly
         index = 0
         try:

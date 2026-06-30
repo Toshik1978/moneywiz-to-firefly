@@ -1,10 +1,25 @@
 import uuid
 from logging import Logger
-from typing import List
 
-from firefly_iii_client import ApiClient, configuration, CurrenciesApi, CurrencyStore, AccountsApi, AccountStore, \
-    CurrencyRead, AccountRead, CategoryRead, CategoriesApi, CategoryStore, TagRead, TagsApi, TagModelStore, TransactionRead, \
-    TransactionsApi, TransactionStore, AccountUpdate
+from firefly_iii_client import (
+    AccountRead,
+    AccountsApi,
+    AccountStore,
+    AccountUpdate,
+    ApiClient,
+    CategoriesApi,
+    CategoryRead,
+    CategoryStore,
+    CurrenciesApi,
+    CurrencyRead,
+    CurrencyStore,
+    TagModelStore,
+    TagRead,
+    TagsApi,
+    TransactionsApi,
+    TransactionStore,
+    configuration,
+)
 
 
 class FireflyClient:
@@ -24,7 +39,7 @@ class FireflyClient:
             header_value='application/json'
         )
 
-    def get_currencies(self) -> List[CurrencyRead]:
+    def get_currencies(self) -> list[CurrencyRead]:
         """Get currencies on the server."""
 
         api = CurrenciesApi(self.__client)
@@ -51,7 +66,7 @@ class FireflyClient:
 
         CurrenciesApi(self.__client).enable_currency(code)
 
-    def get_accounts(self) -> List[AccountRead]:
+    def get_accounts(self) -> list[AccountRead]:
         """Get accounts on the server."""
 
         api = AccountsApi(self.__client)
@@ -78,7 +93,7 @@ class FireflyClient:
 
         AccountsApi(self.__client).update_account(id=account_id, account_update=account, x_trace_id=str(uuid.uuid4()))
 
-    def get_categories(self) -> List[CategoryRead]:
+    def get_categories(self) -> list[CategoryRead]:
         """Get categories on the server."""
 
         api = CategoriesApi(self.__client)
@@ -100,7 +115,7 @@ class FireflyClient:
         r = CategoriesApi(self.__client).store_category(category, x_trace_id=str(uuid.uuid4()))
         return int(r.data.id)
 
-    def get_tags(self) -> List[TagRead]:
+    def get_tags(self) -> list[TagRead]:
         """Get tags on the server."""
 
         api = TagsApi(self.__client)

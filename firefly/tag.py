@@ -1,7 +1,6 @@
 from logging import Logger
-from typing import List
 
-from firefly_iii_client import TagRead, TagModelStore
+from firefly_iii_client import TagModelStore, TagRead
 
 from firefly.client import FireflyClient
 from storage.scheme import Tag
@@ -31,7 +30,7 @@ class TagExporter:
         self.__sync_ff(db, ff)
         self.__logger.info('Sync tags... Done')
 
-    def __sync_db(self, db: List[Tag], ff: List[TagRead]) -> None:
+    def __sync_db(self, db: list[Tag], ff: list[TagRead]) -> None:
         # Update firefly_id for all tags exist in Firefly
         mapping = {t.attributes.tag: t for t in ff}
         for t in db:
@@ -41,7 +40,7 @@ class TagExporter:
                 self.__logger.debug(f'Tag {t.name} updated in database. Id={t.firefly_id}')
         self.__db.add_tags(db)
 
-    def __sync_ff(self, db: List[Tag], ff: List[TagRead]) -> None:
+    def __sync_ff(self, db: list[Tag], ff: list[TagRead]) -> None:
         # Create tag in Firefly
         try:
             mapping = {t.attributes.tag: t for t in ff}

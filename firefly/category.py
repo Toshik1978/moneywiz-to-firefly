@@ -1,7 +1,6 @@
 from logging import Logger
-from typing import List
 
-from firefly_iii_client import CategoryStore, CategoryRead
+from firefly_iii_client import CategoryRead, CategoryStore
 
 from firefly.client import FireflyClient
 from storage.scheme import Category
@@ -31,7 +30,7 @@ class CategoryExporter:
         self.__sync_ff(db, ff)
         self.__logger.info('Sync categories... Done')
 
-    def __sync_db(self, db: List[Category], ff: List[CategoryRead]) -> None:
+    def __sync_db(self, db: list[Category], ff: list[CategoryRead]) -> None:
         # Update firefly_id for all categories exist in Firefly
         mapping = {c.attributes.name: c for c in ff}
         for c in db:
@@ -41,7 +40,7 @@ class CategoryExporter:
                 self.__logger.debug(f'Category {c.name} updated in database. Id={c.firefly_id}')
         self.__db.add_categories(db)
 
-    def __sync_ff(self, db: List[Category], ff: List[CategoryRead]) -> None:
+    def __sync_ff(self, db: list[Category], ff: list[CategoryRead]) -> None:
         # Create category in Firefly
         try:
             mapping = {c.attributes.name: c for c in ff}

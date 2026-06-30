@@ -1,13 +1,22 @@
 from calendar import monthrange
+from collections.abc import Mapping
 from datetime import datetime
 from logging import Logger
-from typing import List, Mapping
 
-from firefly_iii_client import AccountRead, AccountStore, ShortAccountTypeProperty, AccountRoleProperty, \
-    LiabilityTypeProperty, CreditCardTypeProperty, LiabilityDirectionProperty, AccountUpdate, InterestPeriodProperty
+from firefly_iii_client import (
+    AccountRead,
+    AccountRoleProperty,
+    AccountStore,
+    AccountUpdate,
+    CreditCardTypeProperty,
+    InterestPeriodProperty,
+    LiabilityDirectionProperty,
+    LiabilityTypeProperty,
+    ShortAccountTypeProperty,
+)
 
 from firefly.client import FireflyClient
-from firefly.config import Config, SettingsConfig, AccountConfig
+from firefly.config import AccountConfig, Config, SettingsConfig
 from helpers import to_datetime
 from storage.scheme import Account
 from storage.transactions import TransactionsDB
@@ -40,7 +49,7 @@ class AccountExporter:
         self.__sync_ff(db, ff)
         self.__logger.info('Sync accounts... Done')
 
-    def __sync_db(self, db: List[Account], ff: List[AccountRead]) -> None:
+    def __sync_db(self, db: list[Account], ff: list[AccountRead]) -> None:
         # Update firefly_id for all accounts exist in Firefly
         mapping = {a.attributes.name: a for a in ff}
         for a in db:
@@ -50,7 +59,7 @@ class AccountExporter:
                 self.__logger.debug(f'Account {a.name} updated in database. Id={a.firefly_id}')
         self.__db.add_accounts(db)
 
-    def __sync_ff(self, db: List[Account], ff: List[AccountRead]) -> None:
+    def __sync_ff(self, db: list[Account], ff: list[AccountRead]) -> None:
         # Create account in Firefly
         index = 0
         try:

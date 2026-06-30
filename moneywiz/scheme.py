@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Optional
 
 
 @dataclass
@@ -44,10 +43,10 @@ class MwAccount:
     name: str
     """Account name."""
 
-    currency: Optional[str]
+    currency: str | None
     """Currency."""
 
-    balance: Optional[str]
+    balance: str | None
     """Balance."""
 
 
@@ -120,23 +119,23 @@ class MwPayment:
 
 @dataclass
 class MwData:
-    currencies: List[MwCurrency]
+    currencies: list[MwCurrency]
     """All currencies."""
 
-    payees: List[MwPayee]
+    payees: list[MwPayee]
     """All payees."""
 
-    categories: List[MwCategory]
+    categories: list[MwCategory]
     """All categories."""
 
-    tags: List[MwTag]
+    tags: list[MwTag]
     """All tags."""
 
-    accounts: List[MwAccount]
+    accounts: list[MwAccount]
     """All accounts."""
 
-    transfers: List[MwTransfer]
+    transfers: list[MwTransfer]
     """All transfers."""
 
-    payments: List[MwPayment]
+    payments: list[MwPayment]
     """All payments."""

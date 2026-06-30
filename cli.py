@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 import sys
 
@@ -8,9 +7,9 @@ from dotenv import load_dotenv
 from firefly.client import FireflyClient
 from firefly.config import load_config
 from firefly.exporter import Exporter
-from storage.transactions import TransactionsDB
-from moneywiz.importer import CsvImporter
 from moneywiz.analyzer import CsvAnalyzer
+from moneywiz.importer import CsvImporter
+from storage.transactions import TransactionsDB
 
 
 @click.command()

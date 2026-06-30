@@ -1,9 +1,10 @@
+from collections.abc import Mapping
 from logging import Logger
-from typing import List, Mapping, Self
+from typing import Self
 
 from moneywiz.exception import AnalyzerException
 from moneywiz.scheme import MwAccount
-from storage.scheme import Currency, Account
+from storage.scheme import Account, Currency
 
 
 class AccountAnalyzer:
@@ -11,14 +12,14 @@ class AccountAnalyzer:
 
     __logger: Logger
     __currencies: Mapping[str, Currency]
-    __accounts: List[Account]
+    __accounts: list[Account]
 
-    def __init__(self, logger: Logger, currencies: List[Currency], accounts: List[Account]) -> None:
+    def __init__(self, logger: Logger, currencies: list[Currency], accounts: list[Account]) -> None:
         self.__logger = logger
         self.__currencies = {currency.name: currency for currency in currencies}
         self.__accounts = accounts
 
-    def analyze(self, accounts: List[MwAccount]) -> Self:
+    def analyze(self, accounts: list[MwAccount]) -> Self:
         """Analyze account data."""
 
         self.__logger.info('Analyzing accounts...')
@@ -37,7 +38,7 @@ class AccountAnalyzer:
         self.__logger.info('Analyzing accounts... Done')
         return self
 
-    def get(self) -> List[Account]:
+    def get(self) -> list[Account]:
         """Get account data."""
 
         return self.__accounts

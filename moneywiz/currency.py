@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import List, Self
+from typing import Self
 
 from moneywiz.scheme import MwCurrency
 from storage.scheme import Currency
@@ -9,13 +9,13 @@ class CurrencyAnalyzer:
     """Analyze currency data."""
 
     __logger: Logger
-    __currencies: List[Currency]
+    __currencies: list[Currency]
 
-    def __init__(self, logger: Logger, currencies: List[Currency]) -> None:
+    def __init__(self, logger: Logger, currencies: list[Currency]) -> None:
         self.__logger = logger
         self.__currencies = currencies
 
-    def analyze(self, currencies: List[MwCurrency]) -> Self:
+    def analyze(self, currencies: list[MwCurrency]) -> Self:
         """Analyze currency data."""
 
         self.__logger.info('Analyzing currencies...')
@@ -24,7 +24,7 @@ class CurrencyAnalyzer:
         self.__logger.info('Analyzing currencies... Done')
         return self
 
-    def get(self) -> List[Currency]:
+    def get(self) -> list[Currency]:
         """Get currency data."""
 
         return self.__currencies

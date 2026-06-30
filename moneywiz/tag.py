@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import List, Self
+from typing import Self
 
 from moneywiz.scheme import MwTag
 from storage.scheme import Tag
@@ -9,13 +9,13 @@ class TagAnalyzer:
     """Analyze tag data."""
 
     __logger: Logger
-    __tags: List[Tag]
+    __tags: list[Tag]
 
-    def __init__(self, logger: Logger, tags: List[Tag]) -> None:
+    def __init__(self, logger: Logger, tags: list[Tag]) -> None:
         self.__logger = logger
         self.__tags = tags
 
-    def analyze(self, tags: List[MwTag]) -> Self:
+    def analyze(self, tags: list[MwTag]) -> Self:
         """Analyze tag data."""
 
         self.__logger.info('Analyzing tags...')
@@ -24,7 +24,7 @@ class TagAnalyzer:
         self.__logger.info('Analyzing tags... Done')
         return self
 
-    def get(self) -> List[Tag]:
+    def get(self) -> list[Tag]:
         """Get tag data."""
 
         return self.__tags

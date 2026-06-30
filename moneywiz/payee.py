@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import List, Self
+from typing import Self
 
 from helpers import hash_key
 from moneywiz.scheme import MwPayee
@@ -10,13 +10,13 @@ class PayeeAnalyzer:
     """Analyze payee data."""
 
     __logger: Logger
-    __payees: List[Payee]
+    __payees: list[Payee]
 
-    def __init__(self, logger: Logger, payees: List[Payee]) -> None:
+    def __init__(self, logger: Logger, payees: list[Payee]) -> None:
         self.__logger = logger
         self.__payees = payees
 
-    def analyze(self, payees: List[MwPayee]) -> Self:
+    def analyze(self, payees: list[MwPayee]) -> Self:
         """Analyze payee data."""
 
         self.__logger.info('Analyzing payees...')
@@ -26,7 +26,7 @@ class PayeeAnalyzer:
         self.__logger.info('Analyzing payees... Done')
         return self
 
-    def get(self) -> List[Payee]:
+    def get(self) -> list[Payee]:
         """Get payee data."""
 
         return self.__payees

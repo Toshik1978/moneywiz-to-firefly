@@ -1,11 +1,11 @@
 import uuid
+from collections.abc import Mapping
 from logging import Logger
-from typing import List, Mapping
 
-from firefly_iii_client import TransactionStore, TransactionSplitStore, TransactionTypeProperty
+from firefly_iii_client import TransactionSplitStore, TransactionStore, TransactionTypeProperty
 
-from helpers import to_amount, hash_key
 from firefly.client import FireflyClient
+from helpers import hash_key, to_amount
 from storage.scheme import Payment
 from storage.transactions import TransactionsDB
 
@@ -35,27 +35,27 @@ class PaymentExporter:
         self.__sync_ff(self.__db.get_payments())
         self.__logger.info('Sync payments... Done')
 
-    def __sync_ff(self, db: List[Payment]) -> None:
+    def __sync_ff(self, db: list[Payment]) -> None:
         # Create payments in Firefly
         # We want to create split transactions if it's possible
         # Group by account_id -- payee_id -- date
         index = 0
         try:
             mapping = self.__to_dict(db)
-            for l in mapping.values():
+            for group in mapping.values():
                 # Add splits to the transaction
                 t = TransactionStore(transactions=[])
-                for p in l:
+                for p in group:
                     ff_p = self.__to_ff(p)
                     if ff_p.amount != '0.00':
                         t.transactions.append(ff_p)
 
                 if t.transactions:
                     if len(t.transactions) > 1:
-                        t.group_title = l[0].payee.name
+                        t.group_title = group[0].payee.name
                     firefly_id = self.__client.create_transaction(t)
                     self.__logger.debug(f'Payment created. Id={firefly_id}')
-                    for p in l:
+                    for p in group:
                         p.firefly_id = firefly_id
 
                     index += len(t.transactions)
@@ -65,7 +65,7 @@ class PaymentExporter:
             self.__logger.info(f'{index} payments created in total')
             self.__db.add_payments(db)
 
-    def __to_dict(self, db: List[Payment]) -> Mapping[str, List[Payment]]:
+    def __to_dict(self, db: list[Payment]) -> Mapping[str, list[Payment]]:
         mapping = {}
         for p in db:
             payee = p.payee.name if p.payee else uuid.uuid4().hex # Unique Payee name in case it can't be split

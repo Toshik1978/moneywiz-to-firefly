@@ -1,5 +1,4 @@
 from logging import Logger
-from typing import List
 
 from firefly.account import AccountExporter
 from firefly.category import CategoryExporter
@@ -10,7 +9,7 @@ from firefly.payee import PayeeExporter
 from firefly.payment import PaymentExporter
 from firefly.tag import TagExporter
 from firefly.transfer import TransferExporter
-from storage.scheme import Currency, Account, Transfer, Payment, Payee, Category, Tag
+from storage.scheme import Account, Category, Currency, Payee, Payment, Tag, Transfer
 from storage.transactions import TransactionsDB
 
 
@@ -21,13 +20,13 @@ class Exporter:
     __db: TransactionsDB
     __client: FireflyClient
     __config: Config
-    __currencies: List[Currency]
-    __payees: List[Payee]
-    __categories: List[Category]
-    __tags: List[Tag]
-    __accounts: List[Account]
-    __transfers: List[Transfer]
-    __payments: List[Payment]
+    __currencies: list[Currency]
+    __payees: list[Payee]
+    __categories: list[Category]
+    __tags: list[Tag]
+    __accounts: list[Account]
+    __transfers: list[Transfer]
+    __payments: list[Payment]
 
     def __init__(self, logger: Logger, db: TransactionsDB, client: FireflyClient, config: Config):
         self.__logger = logger

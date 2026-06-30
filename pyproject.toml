@@ -24,3 +24,10 @@ build-backend = "hatchling.build"
 # Flat layout: the project is a set of top-level modules and packages
 # rather than a single package matching the project name.
 only-include = ["cli.py", "helpers.py", "firefly", "moneywiz", "storage"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# pycodestyle errors, pyflakes, isort, pyupgrade, flake8-bugbear
+select = ["E", "F", "I", "UP", "B"]

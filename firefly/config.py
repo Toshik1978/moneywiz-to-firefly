@@ -1,8 +1,6 @@
 from dataclasses import dataclass
-from datetime import datetime, date
 from logging import Logger
 from pathlib import Path
-from typing import List, Optional
 
 from dataclasses_json import dataclass_json
 
@@ -15,31 +13,31 @@ class AccountConfig:
     name: str
     """Account name."""
 
-    type: Optional[str] = None
+    type: str | None = None
     """Account type."""
 
-    role: Optional[str] = None
+    role: str | None = None
     """Account role."""
 
-    payment_date: Optional[int] = None
+    payment_date: int | None = None
     """Credit card payment date."""
 
-    liability_type: Optional[str] = ''
+    liability_type: str | None = ''
     """Account liability type."""
 
-    interest: Optional[str] = ''
+    interest: str | None = ''
     """Account interest rate."""
 
-    opening_balance_date: Optional[str] = ''
+    opening_balance_date: str | None = ''
     """Account opening balance date."""
 
-    opening_balance: Optional[str] = ''
+    opening_balance: str | None = ''
     """Account opening balance."""
 
-    active: Optional[bool] = False
+    active: bool | None = False
     """Is account active."""
 
-    ignore: Optional[bool] = False
+    ignore: bool | None = False
     """Should we ignore this account."""
 
 
@@ -66,7 +64,7 @@ class SettingsConfig:
 class Config:
     """Export configuration file."""
 
-    accounts: List[AccountConfig]
+    accounts: list[AccountConfig]
     """Accounts configuration."""
 
     settings: SettingsConfig

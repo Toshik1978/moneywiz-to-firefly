@@ -1,11 +1,11 @@
 from logging import Logger
 from pathlib import Path
-from typing import List, Self
+from typing import Self
 
-from sqlalchemy import Engine, event, create_engine, select
+from sqlalchemy import Engine, create_engine, event, select
 from sqlalchemy.orm import Session
 
-from storage.scheme import Base, Currency, Payee, Category, Tag, Account, Transfer, Payment
+from storage.scheme import Account, Base, Category, Currency, Payee, Payment, Tag, Transfer
 
 DB_NAME = 'MoneyWiz.sqlite'
 
@@ -31,51 +31,51 @@ class TransactionsDB:
     def init(self) -> Self:
         """Initialize database scheme."""
 
-        self.__logger.info(f'Initializing database')
+        self.__logger.info('Initializing database')
         p = Path(self.__path)
         p.mkdir(parents=True, exist_ok=True)
         self.__engine = create_engine(f'sqlite:///{p.joinpath(DB_NAME)}')
         Base.metadata.create_all(self.__engine)
-        self.__logger.info(f'Initialization finished')
+        self.__logger.info('Initialization finished')
         return self
 
-    def get_currencies(self) -> List[Currency]:
+    def get_currencies(self) -> list[Currency]:
         """Get all currencies from DB."""
 
         with Session(self.__engine) as session:
             return [c for c in session.scalars(select(Currency)).all()]
 
-    def get_payees(self) -> List[Payee]:
+    def get_payees(self) -> list[Payee]:
         """Get all payees from DB."""
 
         with Session(self.__engine) as session:
             return [c for c in session.scalars(select(Payee)).all()]
 
-    def get_categories(self) -> List[Category]:
+    def get_categories(self) -> list[Category]:
         """Get all categories from DB."""
 
         with Session(self.__engine) as session:
             return [c for c in session.scalars(select(Category)).all()]
 
-    def get_tags(self) -> List[Tag]:
+    def get_tags(self) -> list[Tag]:
         """Get all tags from DB."""
 
         with Session(self.__engine) as session:
             return [c for c in session.scalars(select(Tag)).all()]
 
-    def get_accounts(self) -> List[Account]:
+    def get_accounts(self) -> list[Account]:
         """Get all accounts from DB."""
 
         with Session(self.__engine) as session:
             return [c for c in session.scalars(select(Account)).all()]
 
-    def get_transfers(self) -> List[Transfer]:
+    def get_transfers(self) -> list[Transfer]:
         """Get all new transfers from DB."""
 
         with Session(self.__engine) as session:
             return [c for c in session.scalars(select(Transfer).filter(Transfer.firefly_id.is_(None))).all()]
 
-    def get_payments(self) -> List[Payment]:
+    def get_payments(self) -> list[Payment]:
         """Get all new payments from DB."""
 
         with Session(self.__engine) as session:
@@ -126,7 +126,7 @@ class TransactionsDB:
                 .where(Payment.tag_id == tag_id)
             ).first()
 
-    def add_currencies(self, currencies: List[Currency]) -> None:
+    def add_currencies(self, currencies: list[Currency]) -> None:
         """Add new currencies to DB."""
 
         with Session(self.__engine, expire_on_commit=False) as session:
@@ -134,7 +134,7 @@ class TransactionsDB:
                 session.add(currency)
             session.commit()
 
-    def add_payees(self, payees: List[Payee]) -> None:
+    def add_payees(self, payees: list[Payee]) -> None:
         """Add new payees to DB."""
 
         with Session(self.__engine, expire_on_commit=False) as session:
@@ -142,7 +142,7 @@ class TransactionsDB:
                 session.add(payee)
             session.commit()
 
-    def add_categories(self, categories: List[Category]) -> None:
+    def add_categories(self, categories: list[Category]) -> None:
         """Add new categories to DB."""
 
         with Session(self.__engine, expire_on_commit=False) as session:
@@ -150,7 +150,7 @@ class TransactionsDB:
                 session.add(category)
             session.commit()
 
-    def add_tags(self, tags: List[Tag]) -> None:
+    def add_tags(self, tags: list[Tag]) -> None:
         """Add new tags to DB."""
 
         with Session(self.__engine, expire_on_commit=False) as session:
@@ -158,7 +158,7 @@ class TransactionsDB:
                 session.add(tag)
             session.commit()
 
-    def add_accounts(self, accounts: List[Account]) -> None:
+    def add_accounts(self, accounts: list[Account]) -> None:
         """Add new accounts to DB."""
 
         with Session(self.__engine, expire_on_commit=False) as session:
@@ -166,7 +166,7 @@ class TransactionsDB:
                 session.add(account)
             session.commit()
 
-    def add_transfers(self, transfers: List[Transfer]) -> None:
+    def add_transfers(self, transfers: list[Transfer]) -> None:
         """Add new transfers to DB."""
 
         with Session(self.__engine, expire_on_commit=False) as session:
@@ -174,7 +174,7 @@ class TransactionsDB:
                 session.merge(transfer)
             session.commit()
 
-    def add_payments(self, payments: List[Payment]) -> None:
+    def add_payments(self, payments: list[Payment]) -> None:
         """Add new payments to DB."""
 
         with Session(self.__engine, expire_on_commit=False) as session:

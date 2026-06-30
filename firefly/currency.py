@@ -1,5 +1,4 @@
 from logging import Logger
-from typing import List
 
 from firefly_iii_client import CurrencyRead, CurrencyStore
 
@@ -31,7 +30,7 @@ class CurrencyExporter:
         self.__sync_ff(db, ff)
         self.__logger.info('Sync currencies... Done')
 
-    def __sync_db(self, db: List[Currency], ff: List[CurrencyRead]) -> None:
+    def __sync_db(self, db: list[Currency], ff: list[CurrencyRead]) -> None:
         # Update firefly_id for all currencies exist in Firefly
         mapping = {c.attributes.code: c for c in ff}
         for c in db:
@@ -41,7 +40,7 @@ class CurrencyExporter:
                 self.__logger.debug(f'Currency {c.name} updated in database. Id={c.firefly_id}')
         self.__db.add_currencies(db)
 
-    def __sync_ff(self, db: List[Currency], ff: List[CurrencyRead]) -> None:
+    def __sync_ff(self, db: list[Currency], ff: list[CurrencyRead]) -> None:
         # Enable or create currency in Firefly
         try:
             mapping = {c.attributes.code: c for c in ff}

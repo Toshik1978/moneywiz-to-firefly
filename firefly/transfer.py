@@ -1,13 +1,17 @@
+from collections.abc import Mapping
 from logging import Logger
-from typing import List, Mapping
 
-from firefly_iii_client import TransactionStore, TransactionSplitStore, TransactionTypeProperty, \
-    ShortAccountTypeProperty
+from firefly_iii_client import (
+    ShortAccountTypeProperty,
+    TransactionSplitStore,
+    TransactionStore,
+    TransactionTypeProperty,
+)
 
+from firefly.client import FireflyClient
 from firefly.config import Config, SettingsConfig
 from helpers import to_amount
-from firefly.client import FireflyClient
-from storage.scheme import Transfer, Account
+from storage.scheme import Account, Transfer
 from storage.transactions import TransactionsDB
 
 
@@ -45,7 +49,7 @@ class TransferExporter:
         self.__sync_ff(self.__db.get_transfers())
         self.__logger.info('Sync transfers... Done')
 
-    def __sync_ff(self, db: List[Transfer]) -> None:
+    def __sync_ff(self, db: list[Transfer]) -> None:
         # Create transfer in Firefly
         index = 0
         try:

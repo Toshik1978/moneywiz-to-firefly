@@ -1,9 +1,9 @@
 import csv
 from logging import Logger
 
-from helpers import hash_key, filter_utf8
+from helpers import filter_utf8, hash_key
 from moneywiz.exception import ImporterException
-from moneywiz.scheme import MwAccount, MwCurrency, MwTransfer, MwPayment, MwData, MwPayee, MwCategory, MwTag
+from moneywiz.scheme import MwAccount, MwCategory, MwCurrency, MwData, MwPayee, MwPayment, MwTag, MwTransfer
 
 
 class CsvImporter:

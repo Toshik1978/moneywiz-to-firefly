@@ -1,6 +1,5 @@
 from itertools import filterfalse
 from logging import Logger
-from typing import List
 
 from moneywiz.account import AccountAnalyzer
 from moneywiz.category import CategoryAnalyzer
@@ -10,7 +9,7 @@ from moneywiz.payment import PaymentAnalyzer
 from moneywiz.scheme import MwData
 from moneywiz.tag import TagAnalyzer
 from moneywiz.transfer import TransferAnalyzer
-from storage.scheme import Currency, Account, Transfer, Payment, Payee, Category, Tag
+from storage.scheme import Account, Category, Currency, Payee, Payment, Tag, Transfer
 from storage.transactions import TransactionsDB
 
 
@@ -19,13 +18,13 @@ class CsvAnalyzer:
 
     __logger: Logger
     __db: TransactionsDB
-    __currencies: List[Currency]
-    __payees: List[Payee]
-    __categories: List[Category]
-    __tags: List[Tag]
-    __accounts: List[Account]
-    __transfers: List[Transfer]
-    __payments: List[Payment]
+    __currencies: list[Currency]
+    __payees: list[Payee]
+    __categories: list[Category]
+    __tags: list[Tag]
+    __accounts: list[Account]
+    __transfers: list[Transfer]
+    __payments: list[Payment]
 
     def __init__(self, logger: Logger, db: TransactionsDB) -> None:
         self.__logger = logger
@@ -57,7 +56,7 @@ class CsvAnalyzer:
     def commit(self) -> None:
         """Commit changes."""
 
-        self.__logger.info(f'Committing changes')
+        self.__logger.info('Committing changes')
         self.__db.add_currencies(self.__currencies)
         self.__db.add_payees(self.__payees)
         self.__db.add_categories(self.__categories)
@@ -65,7 +64,7 @@ class CsvAnalyzer:
         self.__db.add_accounts(self.__accounts)
         self.__db.add_transfers(self.__transfers)
         self.__db.add_payments(self.__payments)
-        self.__logger.info(f'Committed changes')
+        self.__logger.info('Committed changes')
 
     def __deduplicate_transfers(self) -> None:
         """Deduplicate transfers."""

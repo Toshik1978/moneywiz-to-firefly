@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import Optional
-from sqlalchemy import String, DateTime, Boolean, ForeignKey, UniqueConstraint
+
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -22,7 +22,7 @@ class Currency(Base):
     name: Mapped[str] = mapped_column(String(12))
     """Currency name."""
 
-    firefly_id: Mapped[Optional[int]]
+    firefly_id: Mapped[int | None]
     """Firefly currency ID."""
 
     def __repr__(self) -> str:
@@ -46,7 +46,7 @@ class Payee(Base):
     expense: Mapped[bool] = mapped_column(Boolean)
     """Expense category or not."""
 
-    firefly_id: Mapped[Optional[int]]
+    firefly_id: Mapped[int | None]
     """Firefly payee ID."""
 
     def __repr__(self) -> str:
@@ -67,7 +67,7 @@ class Category(Base):
     name: Mapped[str] = mapped_column(String(1024))
     """Category name."""
 
-    firefly_id: Mapped[Optional[int]]
+    firefly_id: Mapped[int | None]
     """Firefly category ID."""
 
     def __repr__(self) -> str:
@@ -88,7 +88,7 @@ class Tag(Base):
     name: Mapped[str] = mapped_column(String(1024))
     """Tag name."""
 
-    firefly_id: Mapped[Optional[int]]
+    firefly_id: Mapped[int | None]
     """Firefly tag ID."""
 
     def __repr__(self) -> str:
@@ -115,13 +115,13 @@ class Account(Base):
     balance: Mapped[str] = mapped_column(String(64))
     """Current balance."""
 
-    firefly_id: Mapped[Optional[int]]
+    firefly_id: Mapped[int | None]
     """Firefly account ID."""
 
-    firefly_type: Mapped[Optional[str]] = mapped_column(String(256))
+    firefly_type: Mapped[str | None] = mapped_column(String(256))
     """Firefly account type."""
 
-    currency: Mapped['Currency'] = relationship(lazy='selectin')
+    currency: Mapped[Currency] = relationship(lazy='selectin')
 
     def __repr__(self) -> str:
         return f'Account(id={self.id!r}, name={self.name!r}, firefly_id={self.firefly_id!r})'
@@ -141,13 +141,13 @@ class Transfer(Base):
     target_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'))
     """Target account ID."""
 
-    payee_id: Mapped[Optional[int]] = mapped_column(ForeignKey('payees.id'))
+    payee_id: Mapped[int | None] = mapped_column(ForeignKey('payees.id'))
     """Payee."""
 
-    category_id: Mapped[Optional[int]] = mapped_column(ForeignKey('categories.id'))
+    category_id: Mapped[int | None] = mapped_column(ForeignKey('categories.id'))
     """Category."""
 
-    description: Mapped[Optional[str]] = mapped_column(String(1024))
+    description: Mapped[str | None] = mapped_column(String(1024))
     """Description."""
 
     date: Mapped[datetime] = mapped_column(DateTime)
@@ -171,20 +171,20 @@ class Transfer(Base):
     target_balance: Mapped[str] = mapped_column(String(64))
     """Balance after transfer."""
 
-    firefly_id: Mapped[Optional[int]]
+    firefly_id: Mapped[int | None]
     """Firefly transfer ID."""
 
-    source: Mapped['Account'] = relationship('Account', foreign_keys=[source_id], lazy='selectin')
+    source: Mapped[Account] = relationship('Account', foreign_keys=[source_id], lazy='selectin')
 
-    target: Mapped['Account'] = relationship('Account', foreign_keys=[target_id], lazy='selectin')
+    target: Mapped[Account] = relationship('Account', foreign_keys=[target_id], lazy='selectin')
 
-    source_currency: Mapped['Currency'] = relationship('Currency', foreign_keys=[source_currency_id], lazy='selectin')
+    source_currency: Mapped[Currency] = relationship('Currency', foreign_keys=[source_currency_id], lazy='selectin')
 
-    target_currency: Mapped['Currency'] = relationship('Currency', foreign_keys=[target_currency_id], lazy='selectin')
+    target_currency: Mapped[Currency] = relationship('Currency', foreign_keys=[target_currency_id], lazy='selectin')
 
-    payee: Mapped['Payee'] = relationship('Payee', lazy='selectin')
+    payee: Mapped[Payee] = relationship('Payee', lazy='selectin')
 
-    category: Mapped['Category'] = relationship('Category', lazy='selectin')
+    category: Mapped[Category] = relationship('Category', lazy='selectin')
 
     def __repr__(self) -> str:
         return f'Transfer(id={self.id!r}, name={self.get_name()!r}, firefly_id={self.firefly_id!r})'
@@ -206,13 +206,13 @@ class Payment(Base):
     account_id: Mapped[int] = mapped_column(ForeignKey('accounts.id'))
     """Account ID."""
 
-    payee_id: Mapped[Optional[int]] = mapped_column(ForeignKey('payees.id'))
+    payee_id: Mapped[int | None] = mapped_column(ForeignKey('payees.id'))
     """Payee."""
 
-    category_id: Mapped[Optional[int]] = mapped_column(ForeignKey('categories.id'))
+    category_id: Mapped[int | None] = mapped_column(ForeignKey('categories.id'))
     """Category."""
 
-    description: Mapped[Optional[str]] = mapped_column(String(1024))
+    description: Mapped[str | None] = mapped_column(String(1024))
     """Description."""
 
     date: Mapped[datetime] = mapped_column(DateTime)
@@ -224,19 +224,19 @@ class Payment(Base):
     balance: Mapped[str] = mapped_column(String(64))
     """Balance after payment."""
 
-    tag_id: Mapped[Optional[int]] = mapped_column(ForeignKey('tags.id'))
+    tag_id: Mapped[int | None] = mapped_column(ForeignKey('tags.id'))
     """Tag."""
 
-    firefly_id: Mapped[Optional[int]]
+    firefly_id: Mapped[int | None]
     """Firefly payment ID."""
 
-    account: Mapped['Account'] = relationship('Account', lazy='selectin')
+    account: Mapped[Account] = relationship('Account', lazy='selectin')
 
-    payee: Mapped['Payee'] = relationship('Payee', lazy='selectin')
+    payee: Mapped[Payee] = relationship('Payee', lazy='selectin')
 
-    category: Mapped['Category'] = relationship('Category', lazy='selectin')
+    category: Mapped[Category] = relationship('Category', lazy='selectin')
 
-    tag: Mapped['Tag'] = relationship('Tag', lazy='selectin')
+    tag: Mapped[Tag] = relationship('Tag', lazy='selectin')
 
     def __repr__(self) -> str:
         return f'Payment(id={self.id!r}, description={self.description!r}, firefly_id={self.firefly_id!r})'
