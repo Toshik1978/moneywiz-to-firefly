@@ -1,16 +1,3 @@
-#!/usr/bin/env -S uv run --script
-#
-# /// script
-# requires-python = ">=3.14"
-# dependencies = [
-#     "click==8.3.1",
-#     "dataclasses-json==0.6.7",
-#     "firefly-iii-client==6.4.0.0",
-#     "python-dotenv==1.2.1",
-#     "sqlalchemy==2.0.46",
-#     "urllib3==2.6.3",
-# ]
-# ///
 # -*- coding: utf-8 -*-
 import logging
 import sys
@@ -74,7 +61,12 @@ def cli(dbpath, dedup, url, token, export, config, v, filename):
             sys.exit(2)
 
 
-# main block
-if __name__ == '__main__':
+def main() -> None:
+    """Console-script entry point."""
+
     load_dotenv()
     cli(auto_envvar_prefix='FIREFLY')
+
+
+if __name__ == '__main__':
+    main()
