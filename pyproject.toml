@@ -11,7 +11,7 @@ dependencies = [
     "dataclasses-json==0.6.7",
     "firefly-iii-client==6.4.0.0",
     "python-dotenv==1.2.1",
-    "sqlalchemy==2.0.46",
+    "sqlalchemy==2.0.51",
     "urllib3==2.6.3",
 ]
 
