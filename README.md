@@ -15,6 +15,29 @@ database, and then pushes it to a Firefly III instance through the REST API.
 > exports those in a way that doesn't map cleanly onto Firefly III's model. Expect to handle
 > them manually.
 
+## Why I built this
+
+I'd tracked every transaction in MoneyWiz since 2011 — **over a decade of history**:
+**25,000+ transactions** across **100+ accounts** in a **handful of currencies**, accumulated
+as life moved across countries and banks. Then I switched from iPhone to
+Android, and discovered that the otherwise-excellent MoneyWiz team had dropped their Android
+app — leaving me with 13 years of finances and no way to keep using them. So I decided to move
+to self-hosted Firefly III instead.
+
+Re-entering all of that by hand was obviously off the table, and the importers I tried choked
+on the scale, the cross-currency transfers, or MoneyWiz's two-rows-per-transfer export format.
+So I wrote this.
+
+The part I'm happiest with: across all of those rows I had to hand-edit only **about three
+dozen** — roughly **one line in a thousand**. Nearly all were transfers whose two halves
+carried slightly mismatched timestamps (or two transfers between the same accounts in the same
+minute); I nudged one side by a minute so the linker could pair them up. A couple were
+single-cent corrections. Everything else — every payee, category, split, tag, currency,
+opening balance and loan payment — imported and exported untouched.
+
+If your MoneyWiz data looks anything like mine, expect a similarly tiny amount of manual
+cleanup.
+
 ## How it works
 
 The migration runs in **two phases** that share a local SQLite database (the "staging DB").
@@ -104,10 +127,97 @@ Firefly URL and token can be provided as flags, environment variables (`FIREFLY_
 | `--export`  | —               | Export mode (omit for import mode)                  |
 | `-v`        | —               | Verbose logging                                     |
 
-The `--config` JSON file maps MoneyWiz account names to Firefly III account types and roles
-(asset / liability / credit card, opening balances, loan interest categories, accounts to
-ignore, etc.). MoneyWiz CSV exports don't carry this information, so it must be supplied here.
-See [`firefly/config.py`](firefly/config.py) for the full schema.
+#### The `--config` file
+
+MoneyWiz CSV exports don't carry an account's type, role, opening balance or interest rate, so
+the export step reads them from a JSON config you provide. It has two sections: a list of
+`accounts` (keyed by the exact MoneyWiz account name) and a block of global `settings`.
+
+> Every account you want in Firefly III must have an entry here. An account that isn't listed
+> (or is marked `ignore`) is **not created** — and any payment/transfer referencing it is
+> skipped with a warning.
+
+A representative config covering each feature:
+
+```json
+{
+  "accounts": [
+    {
+      "name": "Checking - Bank A (€)",
+      "active": true
+    },
+    {
+      "name": "Cash (€)",
+      "role": "cashWalletAsset",
+      "opening_balance_date": "18/08/2011",
+      "opening_balance": "500.00",
+      "active": true
+    },
+    {
+      "name": "Credit Card - Bank A (€)",
+      "role": "ccAsset",
+      "payment_date": 14,
+      "active": true
+    },
+    {
+      "name": "Savings - Bank A (€)",
+      "role": "savingAsset",
+      "active": true
+    },
+    {
+      "name": "Mortgage - Bank B (€)",
+      "type": "liability",
+      "liability_type": "mortgage",
+      "interest": "12",
+      "opening_balance_date": "16/02/2011",
+      "opening_balance": "250000.00",
+      "active": true
+    },
+    {
+      "name": "Old Brokerage (€)",
+      "role": "savingAsset",
+      "active": false
+    },
+    {
+      "name": "Duplicate Wallet (€)",
+      "active": false,
+      "ignore": true
+    }
+  ],
+  "settings": {
+    "default_account_type": "asset",
+    "default_account_role": "defaultAsset",
+    "loan_payment_category": "Banking - Loan Payment",
+    "loan_interest_category": "Banking - Loan Interest"
+  }
+}
+```
+
+**Per-account fields** (only `name` is required; the rest default sensibly):
+
+| Field                  | Applies to     | Description                                                                                          |
+| ---------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
+| `name`                 | all            | Exact MoneyWiz account name (must match the CSV, currency suffix included).                          |
+| `type`                 | all            | `asset` (default) or `liability`.                                                                    |
+| `role`                 | asset          | `defaultAsset` (default), `savingAsset`, `ccAsset`, or `cashWalletAsset`.                            |
+| `payment_date`         | `ccAsset`      | Day of month (1–31) the credit card is paid; clamped to the month's last day.                        |
+| `liability_type`       | liability      | `loan`, `mortgage`, or `debt`.                                                                       |
+| `interest`             | liability      | Interest rate as a string (e.g. `"12"`), charged monthly.                                            |
+| `opening_balance`      | all            | Starting balance as a string; pair it with `opening_balance_date`.                                  |
+| `opening_balance_date` | all            | Date of the opening balance, `dd/mm/yyyy`.                                                           |
+| `active`               | all            | `false` (default) creates the account but disables it and excludes it from net worth.               |
+| `ignore`               | all            | `true` skips the account entirely (not created; its transactions are skipped). Defaults to `false`. |
+
+**Settings** (all four required):
+
+| Field                    | Description                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `default_account_type`   | Type used when an account entry omits `type` (typically `asset`).                                |
+| `default_account_role`   | Role used when an asset account omits `role` (typically `defaultAsset`).                          |
+| `loan_payment_category`  | Firefly category that loan-*principal* transfers are booked under (loan payments to a liability).  |
+| `loan_interest_category` | Firefly category that loan-*interest* transfers are booked under.                                 |
+
+See [`firefly/config.py`](firefly/config.py) for the underlying dataclasses.
 
 ### Helper script
 
