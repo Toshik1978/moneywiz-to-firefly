@@ -42,9 +42,10 @@ uv run pytest --cov          # tests + coverage (config in [tool.coverage.run])
 
 CI (`.github/workflows/ci.yml`) runs `ruff check`, `ruff format --check`, and `pytest --cov`
 on push to `main` and on PRs. There is no coverage gate (it's informational). On push to
-`main` it publishes Tests/Coverage badges by updating a gist — requires repo secrets
-`GIST_ID` (the gist) and `GIST_SECRET_TOKEN` (a PAT with `gist` scope). The README badge URLs
-embed the gist id; replace the `<GIST_ID>` placeholder once the gist exists.
+`main` it publishes Tests/Coverage badges by updating gist
+`3eaf6c98f6741c091eacd84bad2762c6` (referenced in the README badge URLs). This needs repo
+secrets `GIST_ID` (set) and `GIST_SECRET_TOKEN` (a PAT with `gist` scope — must be created by
+a maintainer; the badge JSON is seeded so badges render even before the first CI publish).
 
 ## Architecture
 
