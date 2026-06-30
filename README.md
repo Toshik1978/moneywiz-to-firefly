@@ -43,9 +43,15 @@ To get a usable CSV:
 1. **Unarchive every account** you have ever had (including closed ones).
 2. Run a **full CSV export** covering the **entire date range**.
 
-The exporter expects MoneyWiz's CSV columns: `Account`, `Name`, `Current balance`,
-`Transfers`, `Payee`, `Category`, `Description`, `Amount`, `Balance`, `Currency`, `Date`,
-`Time`, `Tags`. Dates are parsed as `dd/mm/yyyy` and times as `HH:MM`.
+The exporter expects MoneyWiz's CSV columns: `Name`, `Current balance`, `Account`,
+`Transfers`, `Description`, `Payee`, `Category`, `Date`, `Time`, `Amount`, `Currency`,
+`Check #`, `Tags`, `Balance`. Dates are parsed as `dd/mm/yyyy` and times as `HH:MM`. On an
+account-definition row the currency code lives in the `Account` column and the account name
+in `Name`.
+
+MoneyWiz prepends a `sep=,` hint line (and a UTF-8 BOM) to raw exports. The importer detects
+and skips that line automatically, so **both raw exports and files that already had it
+stripped import fine** — no preprocessing required.
 
 ## Usage
 
@@ -109,11 +115,17 @@ values and is **not** meant for general use — treat it as an example.
 
 - **Transfers come as two CSV rows** (one per side) that must be matched back together. The
   linker matches on account pair + date + time first, then falls back to same-day and
-  same-month matching. If the two sides have mismatched timestamps you may need to align the
-  times in MoneyWiz so they pair correctly — otherwise the import fails with "orphaned
-  transfers".
+  same-month matching. Two failure modes need manual fixes in the source data:
+  - *Mismatched timestamps* — if the two sides of a transfer have different times (and fall
+    in different months), they won't pair. Align the times so they match.
+  - *Timestamp collisions* — if **two different transfers** between the **same pair of
+    accounts** happen at the **exact same date and time**, the linker can't tell their sides
+    apart and one stays unpaired. Nudge one transfer's time by a minute (on **both** of its
+    rows) to disambiguate.
+
+  Both surface as an `AnalyzerException` (`orphaned transfers` or `missing transfers detected:
+  N vs M`, where `N - M` is the number of unpaired rows).
 - **Investment / brokerage / crypto accounts** don't map cleanly and aren't supported.
-- There are currently **no automated tests**.
 
 ## License
 

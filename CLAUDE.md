@@ -42,20 +42,17 @@ uv run pytest                # tests (tests/, pure logic: helpers, transfer link
 CI (`.github/workflows/ci.yml`) runs `ruff check`, `ruff format --check`, and `pytest` on
 push to `main` and on PRs.
 
-Note: `tests/test_analyzer_fresh_db.py` has a **strict xfail** documenting a known bug — a
-first import into an empty DB fails because a new currency has no `id` yet when accounts are
-validated. If you fix that, the xfail will start failing (strict) and the marker should be
-removed.
-
 ## Architecture
 
 The entry point is `cli.py` (`cli:main`, a Click CLI). Three packages, each a layer:
 
 - **`moneywiz/`** — read side. `importer.py` parses CSV rows into `Mw*` dataclasses
-  (`scheme.py`). A row is an **account** if it has a `Name`, a **transfer** if it has
-  `Transfers`, otherwise a **payment**. Per-entity analyzers (`account.py`, `payment.py`,
-  `transfer.py`, …) convert `Mw*` dataclasses into `storage/` ORM objects, deduplicating
-  against what's already in the DB. `analyzer.py` orchestrates them in dependency order.
+  (`scheme.py`). It skips a leading `sep=,` hint line if present (raw MoneyWiz exports have
+  one; already-stripped files don't — both work). A row is an **account** if it has a `Name`,
+  a **transfer** if it has `Transfers`, otherwise a **payment**. Per-entity analyzers
+  (`account.py`, `payment.py`, `transfer.py`, …) convert `Mw*` dataclasses into `storage/` ORM
+  objects, deduplicating against what's already in the DB. `analyzer.py` orchestrates them in
+  dependency order.
 - **`storage/`** — SQLite via SQLAlchemy. `scheme.py` has the ORM models
   (`Currency`, `Payee`, `Category`, `Tag`, `Account`, `Transfer`, `Payment`);
   `transactions.py` (`TransactionsDB`) is the data-access layer. `firefly_id` columns track
@@ -74,8 +71,16 @@ The entry point is `cli.py` (`cli:main`, a Click CLI). Three packages, each a la
 - **Transfer linking is the hard part.** MoneyWiz exports each transfer as **two rows** (the
   debit side and the credit side). `moneywiz/transfer.py` matches them into one `Transfer`
   using progressively looser keys: exact (source+target+date+time+category) → same date →
-  same month. Unmatched rows raise `AnalyzerException("Orphaned transfers...")`. The sign of
-  the amount decides which row is source vs target.
+  same month. Unmatched rows raise `AnalyzerException` (`orphaned transfers` or `missing
+  transfers detected: N vs M`). The sign of the amount decides which row is source vs target.
+  Two real-data failure modes need manual edits to the CSV: mismatched timestamps between the
+  two sides, and **collisions** (two different transfers between the same account pair at the
+  exact same date+time — nudge one by a minute on both rows).
+- **Analyzers link relations by object, not id.** `Account`/`Transfer`/`Payment` are built
+  with the related ORM **object** (`currency=`, `source=`, `payee=`…), never `*_id=`. A freshly
+  parsed entity has no `id` yet; SQLAlchemy resolves the FK on commit (commit order in
+  `analyzer.commit()` persists reference data before the rows that point at it). Setting
+  `*_id=...obj.id` instead silently writes `None` on a fresh DB — that was a real bug.
 - **Sign convention:** an amount starting with `-` is a withdrawal / the source side.
 - **Payment splits:** `firefly/payment.py` groups payments by account + payee + type + minute
   and creates a Firefly split transaction when more than one falls in the same bucket.
