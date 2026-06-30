@@ -5,11 +5,32 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Load configuration from a .env file next to this script, if present.
-if [ -f "${SCRIPT_DIR}/.env" ]; then
+# Load deployment configuration. This script is meant to be installed onto your
+# PATH (e.g. ~/.local/bin), so we do NOT look beside the script first — we look
+# in a real config location. Lookup order, first match wins:
+#   1. $MONEYWIZ_CONFIG            explicit override (error if set but missing)
+#   2. $XDG_CONFIG_HOME (or ~/.config)/moneywiz-to-firefly/config
+#   3. <dir of this script>/config  convenience when run from a checkout
+# See update_firefly.config.dist for the file format.
+CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME}/.config}"
+if [ -n "${MONEYWIZ_CONFIG:-}" ]; then
+    if [ ! -f "${MONEYWIZ_CONFIG}" ]; then
+        echo "Error: MONEYWIZ_CONFIG is set but '${MONEYWIZ_CONFIG}' does not exist" 1>&2
+        exit 1
+    fi
+    DEPLOY_CONFIG="${MONEYWIZ_CONFIG}"
+elif [ -f "${CONFIG_HOME}/moneywiz-to-firefly/config" ]; then
+    DEPLOY_CONFIG="${CONFIG_HOME}/moneywiz-to-firefly/config"
+elif [ -f "${SCRIPT_DIR}/config" ]; then
+    DEPLOY_CONFIG="${SCRIPT_DIR}/config"
+else
+    DEPLOY_CONFIG=""
+fi
+
+if [ -n "${DEPLOY_CONFIG}" ]; then
     set -a
-    # shellcheck disable=SC1091
-    . "${SCRIPT_DIR}/.env"
+    # shellcheck disable=SC1090
+    . "${DEPLOY_CONFIG}"
     set +a
 fi
 
@@ -27,12 +48,14 @@ Options:
     -h, --help     This help output
     -V, --version  Show version
 
-Configuration (via environment or a .env file beside this script, see .env.dist):
+Configuration (via the environment or a config file, see update_firefly.config.dist).
+Config file lookup order: \$MONEYWIZ_CONFIG, then
+\${XDG_CONFIG_HOME:-~/.config}/moneywiz-to-firefly/config, then ./config beside this script.
     DEPLOY_SSH_HOST     SSH host to deploy to (e.g. "user@host" or a ~/.ssh/config alias)
     DEPLOY_REMOTE_PATH  Base dir on the host holding reports/, db/, and config.json
     DEPLOY_PROJECT_DIR  Path to the moneywiz-to-firefly checkout on the host
     DEPLOY_PATH_PREFIX  Optional: dir to prepend to PATH on the host so uv is found
-                        (see .env.dist; leave unset to keep the host's PATH as-is)
+                        (see update_firefly.config.dist; leave unset to keep the host's PATH as-is)
 
 Examples:
     $(basename "$0") report.csv
@@ -87,15 +110,16 @@ fi
 # If empty parameters - show usage
 [ -z "$*" ] && [ ${IMPORT} = "1" ] && usage
 
-# Required deployment configuration (from .env or the environment).
-: "${DEPLOY_SSH_HOST:?is not set — copy .env.dist to .env and fill it in}"
-: "${DEPLOY_REMOTE_PATH:?is not set — copy .env.dist to .env and fill it in}"
-: "${DEPLOY_PROJECT_DIR:?is not set — copy .env.dist to .env and fill it in}"
+# Required deployment configuration (from the config file or the environment).
+CONFIG_HINT="copy update_firefly.config.dist to ${CONFIG_HOME}/moneywiz-to-firefly/config and fill it in"
+: "${DEPLOY_SSH_HOST:?is not set — ${CONFIG_HINT}}"
+: "${DEPLOY_REMOTE_PATH:?is not set — ${CONFIG_HINT}}"
+: "${DEPLOY_PROJECT_DIR:?is not set — ${CONFIG_HINT}}"
 
 # Normalize the remote path to end with a single slash.
 DEPLOY_REMOTE_PATH="${DEPLOY_REMOTE_PATH%/}/"
 
-# Optional dir prepended to PATH on the host so `uv` is found (set in .env). Empty
+# Optional dir prepended to PATH on the host so `uv` is found (set in the config). Empty
 # (unset) leaves the host's login PATH untouched.
 DEPLOY_PATH_PREFIX="${DEPLOY_PATH_PREFIX:-}"
 

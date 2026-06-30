@@ -290,3 +290,6 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python,intellij
 
 .db
+
+# Local deploy config for update_firefly.sh (run-from-checkout fallback)
+/config

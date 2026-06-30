@@ -119,6 +119,11 @@ The entry point is `cli.py` (`cli:main`, a Click CLI). Three packages, each a la
 ## Gotchas when editing
 
 - New top-level modules/packages must be added to `only-include` in `pyproject.toml`.
-- `update_firefly.sh` is configured via `.env` (`DEPLOY_SSH_HOST`, `DEPLOY_REMOTE_PATH`,
-  `DEPLOY_PROJECT_DIR`); it sources `.env` beside the script and errors if they're unset.
+- `update_firefly.sh` is meant to be installed onto `PATH`, so it reads a **dedicated deploy
+  config** (`DEPLOY_SSH_HOST`, `DEPLOY_REMOTE_PATH`, `DEPLOY_PROJECT_DIR`,
+  `DEPLOY_PATH_PREFIX`), not the `.env`. Lookup order: `$MONEYWIZ_CONFIG` →
+  `${XDG_CONFIG_HOME:-~/.config}/moneywiz-to-firefly/config` → `./config` beside the script;
+  template is `update_firefly.config.dist`. It errors if the required vars are unset. The
+  `.env`/`.env.dist` now only holds `FIREFLY_URL`/`FIREFLY_TOKEN`, loaded by the Python CLI on
+  the host (not by the bash wrapper locally) — that machine split was the original bug.
 - Investment / brokerage / crypto accounts are known-unsupported; don't assume they work.

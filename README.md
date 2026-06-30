@@ -112,8 +112,20 @@ See [`firefly/config.py`](firefly/config.py) for the full schema.
 ### Helper script
 
 [`update_firefly.sh`](update_firefly.sh) is a convenience wrapper that ships a CSV to a remote
-host over SSH and runs import + export there. Configure it via environment variables or a
-`.env` file beside the script (see [`.env.dist`](.env.dist)):
+host over SSH and runs import + export there. It's designed to be installed onto your `PATH`
+(e.g. `~/.local/bin`), so it reads its settings from a dedicated config file rather than from a
+`.env` beside the script. Copy [`update_firefly.config.dist`](update_firefly.config.dist) into
+place and fill it in:
+
+```bash
+mkdir -p ~/.config/moneywiz-to-firefly
+cp update_firefly.config.dist ~/.config/moneywiz-to-firefly/config
+```
+
+The config file is looked up in this order (first match wins): `$MONEYWIZ_CONFIG`, then
+`${XDG_CONFIG_HOME:-~/.config}/moneywiz-to-firefly/config`, then `./config` beside the script
+(handy when running from a checkout). Settings can also be passed as plain environment
+variables:
 
 | Variable             | Description                                                       |
 | -------------------- | ----------------------------------------------------------------- |
@@ -122,10 +134,10 @@ host over SSH and runs import + export there. Configure it via environment varia
 | `DEPLOY_PROJECT_DIR` | Path to the `moneywiz-to-firefly` checkout on the host            |
 | `DEPLOY_PATH_PREFIX` | Optional: dir to prepend to the host's `PATH` so `uv` is found (mise shims; empty = leave PATH as-is) |
 
-Paths that should expand on the **host** (e.g. using `$HOME`) must be single-quoted in `.env`
-so they aren't expanded locally — e.g. `DEPLOY_PROJECT_DIR='$HOME/moneywiz-to-firefly'`. The
-host also needs its own Firefly credentials (`FIREFLY_URL` / `FIREFLY_TOKEN`) for the export
-step.
+Paths that should expand on the **host** (e.g. using `$HOME`) must be single-quoted in the
+config so they aren't expanded locally — e.g. `DEPLOY_PROJECT_DIR='$HOME/moneywiz-to-firefly'`.
+The host also needs its own Firefly credentials (`FIREFLY_URL` / `FIREFLY_TOKEN`, see
+[`.env.dist`](.env.dist)) for the export step.
 
 ## Known limitations & gotchas
 

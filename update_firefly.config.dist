@@ -1,0 +1,24 @@
+# Deployment configuration for update_firefly.sh (sourced as shell KEY=value).
+#
+# Install this to a real config location so it survives the script being placed
+# on your PATH (e.g. ~/.local/bin):
+#
+#     mkdir -p ~/.config/moneywiz-to-firefly
+#     cp update_firefly.config.dist ~/.config/moneywiz-to-firefly/config
+#
+# Lookup order (first match wins): $MONEYWIZ_CONFIG,
+# ${XDG_CONFIG_HOME:-~/.config}/moneywiz-to-firefly/config, then ./config beside
+# the script (handy when running from a checkout).
+#
+# NOTE: paths that should expand on the HOST (not locally) must be single-quoted,
+# e.g. DEPLOY_PROJECT_DIR='$HOME/Development/moneywiz-to-firefly'
+
+# SSH host to deploy to: "user@host" or a ~/.ssh/config alias
+DEPLOY_SSH_HOST=
+# Base directory on the host holding reports/, db/, and config.json
+DEPLOY_REMOTE_PATH=
+# Path to the moneywiz-to-firefly checkout on the host
+DEPLOY_PROJECT_DIR=
+# Dir to prepend to PATH on the host so `uv` is found (mise shims).
+# Leave empty to use the host's login PATH as-is.
+DEPLOY_PATH_PREFIX='$HOME/.local/share/mise/shims'
