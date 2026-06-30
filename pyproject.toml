@@ -12,7 +12,7 @@ dependencies = [
     "firefly-iii-client==6.4.0.0",
     "python-dotenv==1.2.2",
     "sqlalchemy==2.0.51",
-    "urllib3==2.6.3",
+    "urllib3==2.7.0",
 ]
 
 [project.scripts]
