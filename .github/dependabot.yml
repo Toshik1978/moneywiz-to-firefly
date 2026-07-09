@@ -9,6 +9,15 @@ updates:
     commit-message:
       prefix: build
       include: scope
+    # Group all non-major updates into a single PR; majors get their own PRs.
+    groups:
+      python-dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
 
   # GitHub Actions used by the CI workflow
   - package-ecosystem: github-actions
@@ -19,3 +28,12 @@ updates:
     commit-message:
       prefix: ci
       include: scope
+    # Group all non-major updates into a single PR; majors get their own PRs.
+    groups:
+      github-actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
