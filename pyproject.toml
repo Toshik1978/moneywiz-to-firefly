@@ -7,11 +7,11 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.14"
 dependencies = [
-    "click==8.4.2",
+    "click==8.5.0",
     "dataclasses-json==0.6.7",
     "firefly-iii-client==6.4.0.0",
-    "python-dotenv==1.2.2",
-    "sqlalchemy==2.0.51",
+    "python-dotenv==1.2.3",
+    "sqlalchemy==2.0.52",
     "urllib3==2.7.0",
 ]
 
