@@ -112,10 +112,6 @@ The entry point is `cli.py` (`cli:main`, a Click CLI). Three packages, each a la
   in `[tool.hatch.build.targets.wheel].only-include`. Add new top-level modules/packages there
   or they won't ship in the wheel. Imports are absolute (`from firefly...`, `from helpers...`).
 
-## Git conventions
-
-- **Never add `Co-Authored-By` trailers** (or any AI attribution) to commit messages.
-
 ## Gotchas when editing
 
 - New top-level modules/packages must be added to `only-include` in `pyproject.toml`.
