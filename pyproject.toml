@@ -10,8 +10,8 @@ dependencies = [
     "click==8.5.0",
     "dataclasses-json==0.6.7",
     "firefly-iii-client==6.4.0.0",
-    "python-dotenv==1.2.3",
-    "sqlalchemy==2.1.1",
+    "python-dotenv==1.2.4",
+    "sqlalchemy==2.1.6",
     "urllib3==2.8.0",
 ]
 
